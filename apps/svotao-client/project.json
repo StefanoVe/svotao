@@ -15,14 +15,13 @@
         "main": "apps/svotao-client/src/main.ts",
         "polyfills": ["zone.js"],
         "tsConfig": "apps/svotao-client/tsconfig.app.json",
-        "inlineStyleLanguage": "scss",
         "assets": [
           {
             "glob": "**/*",
             "input": "apps/svotao-client/public"
           }
         ],
-        "styles": ["apps/svotao-client/src/styles.scss"]
+        "styles": ["apps/svotao-client/src/styles.css"]
       },
       "configurations": {
         "production": {
@@ -87,8 +86,7 @@
       "options": {
         "outputPath": "dist/apps/svotao-client/server",
         "main": "apps/svotao-client/src/server.ts",
-        "tsConfig": "apps/svotao-client/tsconfig.server.json",
-        "inlineStyleLanguage": "scss"
+        "tsConfig": "apps/svotao-client/tsconfig.server.json"
       },
       "configurations": {
         "production": {
