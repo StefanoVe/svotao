@@ -1,0 +1,37 @@
+@reference "tailwindcss";
+.liquid-glass {
+  @apply p-2 min-w-5 min-h-5 shrink-0 grow-0 rounded-full backdrop-blur-sm border border-white/20 shadow-lg active:brightness-200 transition-all duration-300 ease-in-out active:scale-110 hover:brightness-105 hover:scale-105 text-white aspect-square;
+  background: light-dark(
+    hsl(0 0% 100% / var(--frost, 0)),
+    hsl(0 0% 0% / var(--frost, 0))
+  );
+
+  box-shadow: 0 0 2px 1px
+      light-dark(
+        color-mix(in oklch, canvasText, #0000 85%),
+        color-mix(in oklch, canvasText, #0000 65%)
+      )
+      inset,
+    0 0 10px 4px
+      light-dark(
+        color-mix(in oklch, canvasText, #0000 90%),
+        color-mix(in oklch, canvasText, #0000 85%)
+      )
+      inset,
+    0px 4px 16px rgba(17, 17, 26, 0.05), 0px 8px 24px rgba(17, 17, 26, 0.05),
+    0px 16px 56px rgba(17, 17, 26, 0.05),
+    0px 4px 16px rgba(17, 17, 26, 0.05) inset,
+    0px 8px 24px rgba(17, 17, 26, 0.05) inset,
+    0px 16px 56px rgba(17, 17, 26, 0.05) inset;
+
+  &.lq-item {
+    @apply bg-transparent border-0 shadow-none backdrop-blur-none;
+    &.lqi-selected {
+      @apply bg-white/10 border shadow-lg backdrop-blur-sm;
+    }
+  }
+
+  &.lq-host {
+    @apply backdrop-brightness-125 aspect-auto;
+  }
+}

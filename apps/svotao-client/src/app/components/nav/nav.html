@@ -1,0 +1,22 @@
+<div class="fixed bottom-3 flex justify-between w-full px-2">
+  <svotao-liquid-glass
+    containerClass=" flex justify-center items-center gap-4 "
+    [type]="'host'"
+  >
+    @for (item of items; track $index) {
+    <svotao-liquid-glass
+      [type]="'item'"
+      (click)="handleClick(item)"
+      [selected]="isActive(item)"
+    >
+      <tabler-icon [name]="item.icon"></tabler-icon>
+    </svotao-liquid-glass>
+    }
+  </svotao-liquid-glass>
+
+  <svotao-liquid-glass class="flex justify-center items-center" [type]="'host'">
+    <svotao-liquid-glass containerClass="shrink-0 " [type]="'item'">
+      <tabler-icon name="star-filled"></tabler-icon>
+    </svotao-liquid-glass>
+  </svotao-liquid-glass>
+</div>

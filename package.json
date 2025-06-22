@@ -57,6 +57,7 @@
     "@angular/router": "~20.0.0",
     "@nx/angular": "^21.2.1",
     "@tailwindcss/postcss": "^4.1.10",
+    "angular-tabler-icons": "^3.26.0",
     "rxjs": "~7.8.0",
     "zone.js": "~0.15.0"
   }

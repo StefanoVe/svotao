@@ -1,2 +1,60 @@
-<div class="bg-red-500">aaa</div>
-<router-outlet></router-outlet>
+<svotao-nav></svotao-nav>
+<div
+  class="h-screen w-screen bg-gradient-to-b from-[#393939] to-[#1a1a1a] px-3"
+>
+  <div class="h-full flex justify-end pb-28 items-center flex-col">
+    <div class="flex gap-2 items-center w-full">
+      <svotao-liquid-glass
+        class="w-full"
+        containerClass="flex lq-host relative"
+      >
+        <svg
+          class="size-6 absolute right-2"
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="1.5"
+          viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="m18 18.765 1.647-.015A1.36 1.36 0 0 0 21 17.397V6.603a1.36 1.36 0 0 0-1.353-1.353L18 5.265"
+          ></path>
+          <path
+            d="m6 5.25-1.725.015C3.531 5.265 3 5.875 3 6.62v10.794c0 .744.53 1.352 1.275 1.352L6 18.75"
+          ></path>
+          <path d="M18 9v6"></path>
+          <path d="M15 7.5v9"></path>
+          <path d="M12 8.25v7.5"></path>
+          <path d="M9 7.5v9"></path>
+          <path d="M6 9v6"></path>
+        </svg>
+
+        <input
+          type="text"
+          class="w-full outline-none placeholder:opacity-80 mr-9"
+          placeholder="Cosa ti è rimasto in casa?"
+        />
+      </svotao-liquid-glass>
+      <svotao-liquid-glass
+        containerClass="flex gap-1 lq-host flex-col items-center aspect-square"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="size-6"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m8.25 4.5 7.5 7.5-7.5 7.5"
+          />
+        </svg>
+      </svotao-liquid-glass>
+    </div>
+  </div>
+</div>
