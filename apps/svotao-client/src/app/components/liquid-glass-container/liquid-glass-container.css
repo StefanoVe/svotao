@@ -34,4 +34,8 @@
   &.lq-host {
     @apply backdrop-brightness-125 aspect-auto;
   }
+
+  &.lq-card {
+    @apply rounded-xl;
+  }
 }

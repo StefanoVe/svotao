@@ -35,12 +35,12 @@ export class Nav {
 
   public items = [
     {
-      path: '/search',
-      icon: 'chef-hat-filled',
-    },
-    {
       path: '/history',
       icon: 'history',
+    },
+    {
+      path: '/favorites',
+      icon: 'star-filled',
     },
     {
       path: '/settings',

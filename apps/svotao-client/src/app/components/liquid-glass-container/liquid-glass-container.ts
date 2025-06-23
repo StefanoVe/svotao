@@ -9,12 +9,11 @@ import { Component, Input } from '@angular/core';
 })
 export class LiquidGlassContainer {
   @Input() containerClass = '';
-  @Input() type: 'item' | 'host' = 'host';
+  @Input() type: 'item' | 'host' | 'card' = 'host';
   @Input() selected = false;
 
   public get lqClasses(): string {
-    let baseClasses = 'liquid-glass ';
-    baseClasses += this.type === 'item' ? 'lq-item' : 'lq-host';
+    let baseClasses = `liquid-glass lq-${this.type}`;
 
     if (this.selected && this.type === 'item') {
       baseClasses += ' lqi-selected';

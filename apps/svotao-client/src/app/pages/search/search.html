@@ -1,0 +1,50 @@
+<div class="h-full flex justify-between items-center flex-col">
+  <div class="text-left w-full text-white">
+    <h1 class="font-bold text-3xl">I tuoi avanzi</h1>
+    <div class="grid grid-cols-1 mt-4">
+      @for (ingredient of ingredients$ | async; track $index) {
+
+      <svotao-liquid-glass
+        type="card"
+        class="w-full p-4 py-2"
+        containerClass="relative h-40 w-full overflow-hidden "
+      >
+        <img
+          [src]="ingredient.thumb"
+          class="size-full absolute object-cover shrink-0 top-0 left-0 blur brightness-75 saturate-50 -z-10"
+          alt=""
+        />
+
+        <div class="flex flex-col justify-between h-full">
+          <h2 class="font-medium text-xl">{{ ingredient.name }}</h2>
+          <div class="flex justify-end w-full gap-2">
+            <svotao-liquid-glass type="item" containerClass="size-8">
+              <tabler-icon name="edit"></tabler-icon>
+            </svotao-liquid-glass>
+            <svotao-liquid-glass type="item" containerClass="size-8">
+              <tabler-icon name="trash" class="text-red-500"></tabler-icon>
+            </svotao-liquid-glass>
+          </div>
+        </div>
+      </svotao-liquid-glass>
+
+      }
+    </div>
+  </div>
+  <div class="flex gap-2 items-center w-full">
+    <svotao-liquid-glass class="w-full" containerClass="flex lq-host relative">
+      <tabler-icon name="barcode" class="size-6 absolute right-3"></tabler-icon>
+
+      <input
+        type="text"
+        class="w-full outline-none placeholder:opacity-80 mr-9"
+        placeholder="Cosa ti è rimasto in casa?"
+      />
+    </svotao-liquid-glass>
+    <svotao-liquid-glass
+      containerClass="flex gap-1 lq-host flex-col items-center aspect-square"
+    >
+      <tabler-icon name="chevron-right" class="size-6"></tabler-icon>
+    </svotao-liquid-glass>
+  </div>
+</div>

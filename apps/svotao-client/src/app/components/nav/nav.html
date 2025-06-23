@@ -15,8 +15,13 @@
   </svotao-liquid-glass>
 
   <svotao-liquid-glass class="flex justify-center items-center" [type]="'host'">
-    <svotao-liquid-glass containerClass="shrink-0 " [type]="'item'">
-      <tabler-icon name="star-filled"></tabler-icon>
+    <svotao-liquid-glass
+      containerClass="shrink-0 "
+      [type]="'item'"
+      (click)="handleClick({path: 'search'})"
+      [selected]="isActive({path: 'search'})"
+    >
+      <tabler-icon name="chef-hat-filled"></tabler-icon>
     </svotao-liquid-glass>
   </svotao-liquid-glass>
 </div>
