@@ -1,0 +1,93 @@
+{
+  "name": "svotao-p2p-share-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "svotao-p2p-share",
+  "sourceRoot": "apps/svotao-p2p-share-client/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/apps/svotao-p2p-share-client",
+        "browser": "apps/svotao-p2p-share-client/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "apps/svotao-p2p-share-client/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "apps/svotao-p2p-share-client/public"
+          }
+        ],
+        "styles": ["apps/svotao-p2p-share-client/src/styles.css"],
+        "server": "apps/svotao-p2p-share-client/src/main.server.ts",
+        "ssr": {
+          "entry": "apps/svotao-p2p-share-client/src/server.ts"
+        },
+        "outputMode": "server"
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "svotao-p2p-share-client:build:production"
+        },
+        "development": {
+          "buildTarget": "svotao-p2p-share-client:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular/build:extract-i18n",
+      "options": {
+        "buildTarget": "svotao-p2p-share-client:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "apps/svotao-p2p-share-client/jest.config.ts"
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "svotao-p2p-share-client:build",
+        "staticFilePath": "dist/apps/svotao-p2p-share-client/browser",
+        "spa": true
+      }
+    }
+  }
+}

@@ -26,13 +26,18 @@
 
   &.lq-item {
     @apply bg-transparent border-0 shadow-none backdrop-blur-none;
-    &.lqi-selected {
-      @apply bg-white/10 border shadow-lg backdrop-blur-sm;
-    }
+  }
+
+  &.lq-selected-item {
+    @apply bg-white/10 border shadow-lg backdrop-blur-sm pointer-events-none;
   }
 
   &.lq-host {
     @apply backdrop-brightness-125 aspect-auto;
+  }
+
+  &.lq-selected-host {
+    @apply backdrop-brightness-150 bg-gradient-to-b from-blue-400 to-blue-500 shadow-lg shadow-blue-500/50 pointer-events-none;
   }
 
   &.lq-card {

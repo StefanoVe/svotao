@@ -1,4 +1,4 @@
-<div class="h-full flex justify-between items-center flex-col">
+<div class="h-full">
   <div class="text-left w-full text-white">
     <h1 class="font-bold text-3xl">I tuoi avanzi</h1>
     <div class="grid grid-cols-1 mt-4">
@@ -29,9 +29,14 @@
       </svotao-liquid-glass>
 
       }
+      <svotao-liquid-glass
+        type="card"
+        class="w-full p-4 py-2 opacity-0 pointer-events-none"
+        containerClass="relative h-40 w-full overflow-hidden "
+      ></svotao-liquid-glass>
     </div>
   </div>
-  <div class="flex gap-2 items-center w-full">
+  <div class="flex gap-2 items-center w-full sticky z-20 bottom-0">
     <svotao-liquid-glass class="w-full" containerClass="flex lq-host relative">
       <tabler-icon name="barcode" class="size-6 absolute right-3"></tabler-icon>
 
