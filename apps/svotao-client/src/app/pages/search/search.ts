@@ -8,7 +8,7 @@ import {
   IconTrash,
 } from 'angular-tabler-icons/icons';
 import { BehaviorSubject } from 'rxjs';
-import { LiquidGlassContainer } from '../../components/liquid-glass-container/liquid-glass-container';
+import { LiquidGlassContainer } from 'vecholib/angular/components';
 
 @Component({
   selector: 'svotao-search',

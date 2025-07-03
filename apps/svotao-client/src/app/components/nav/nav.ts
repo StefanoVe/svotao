@@ -9,7 +9,7 @@ import {
   IconSearch,
   IconStarFilled,
 } from 'angular-tabler-icons/icons';
-import { LiquidGlassContainer } from '../liquid-glass-container/liquid-glass-container';
+import { LiquidGlassContainer } from 'vecholib/angular/components';
 @Component({
   selector: 'svotao-nav',
   imports: [

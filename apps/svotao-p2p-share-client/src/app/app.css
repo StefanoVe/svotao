@@ -1,0 +1,5 @@
+@reference "tailwindcss";
+
+:host ::ng-deep vecholib-upload ngx-dropzone {
+  @apply text-gray-50 !bg-transparent backdrop-brightness-105  size-[50vh] aspect-square border-none;
+}
