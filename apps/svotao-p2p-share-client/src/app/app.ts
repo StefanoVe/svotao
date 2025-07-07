@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { afterNextRender, Component, inject } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import {
@@ -6,6 +6,7 @@ import {
   UploadComponent,
 } from 'vecholib/angular/components';
 import { TailwindFormsModule } from 'vecholib/angular/modules';
+import { SocketService } from './services/socket.service';
 @Component({
   imports: [
     RouterModule,
@@ -18,6 +19,7 @@ import { TailwindFormsModule } from 'vecholib/angular/modules';
   styleUrl: './app.css',
 })
 export class App {
+  private _socketio = inject(SocketService);
   public form = new FormGroup({
     file: new FormArray([
       new FormGroup({
@@ -26,4 +28,10 @@ export class App {
       }),
     ]),
   });
+
+  constructor() {
+    afterNextRender(() => {
+      this._socketio.connect('client');
+    });
+  }
 }

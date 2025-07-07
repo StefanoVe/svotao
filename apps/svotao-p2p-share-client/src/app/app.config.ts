@@ -13,6 +13,7 @@ import {
   provideTailwindForms,
   provideTailwindToasts,
 } from 'vecholib/angular/modules';
+import { provideSocketConnectionHandlerService } from 'vecholib/angular/services';
 import { appRoutes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
@@ -24,5 +25,9 @@ export const appConfig: ApplicationConfig = {
     provideTailwindForms({}),
     provideHttpClient(withFetch()),
     provideTailwindToasts(),
+    provideSocketConnectionHandlerService({
+      url: 'http://localhost:3000',
+      secure: true,
+    }),
   ],
 };
