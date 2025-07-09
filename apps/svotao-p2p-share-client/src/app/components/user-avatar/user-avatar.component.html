@@ -2,12 +2,16 @@
   <svotao-liquid-glass
     type="host"
     [selected]="selected"
-    containerClass=" size-full flex justify-center items-center cursor-pointer"
+    class="rounded-full"
+    [ngStyle]="
+      useRandomBackground ? { 'background-color': backgroundColor } : {}
+    "
+    containerClass=" size-full flex justify-center items-center cursor-pointer "
     [title]="user"
   >
     <img
       src="https://api.dicebear.com/9.x/big-smile/svg?seed={{ user }}"
-      class="p-2 size-full"
+      class="size-full p-1 rounded-full"
       alt="{{ user }} avatar "
     />
   </svotao-liquid-glass>

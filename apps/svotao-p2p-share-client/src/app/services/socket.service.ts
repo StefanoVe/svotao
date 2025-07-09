@@ -14,7 +14,11 @@ export interface ISocketReadyData {
 })
 export class SocketService extends SocketConnectionHandlerService {
   public socketData$ = new ReplaySubject<ISocketReadyData>(1);
-  public roomData$ = new ReplaySubject<IFloorManagerRoom>(1);
+  public roomData$ = new ReplaySubject<
+    IFloorManagerRoom<{
+      file: { name: string; size: number };
+    }>
+  >(1);
   override appEvents(): void {
     this.socket.on(
       EnumSocketIOAppEvents.SocketReady,
@@ -40,5 +44,14 @@ export class SocketService extends SocketConnectionHandlerService {
           .subscribe();
       },
     );
+  }
+
+  public uploadFile(file: File | null): void {
+    console.log('Uploading file:', file);
+    this.socket.emit(EnumSocketIOAppEvents.FileUploaded, {
+      name: file?.name,
+      size: file?.size,
+      type: file?.type,
+    });
   }
 }

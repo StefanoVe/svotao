@@ -18,6 +18,7 @@ import {
 import { TailwindFormsModule, ToastrService } from 'vecholib/angular/modules';
 import { environment } from '../environments/environment';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
+import { FileSizePipe } from './pipes/filesize.pipe';
 import { SocketService } from './services/socket.service';
 @Component({
   imports: [
@@ -28,6 +29,7 @@ import { SocketService } from './services/socket.service';
     AsyncPipe,
     CommonModule,
     UserAvatarComponent,
+    FileSizePipe,
   ],
   selector: 'svotao-p2p-share-root',
   templateUrl: './app.html',
@@ -83,6 +85,8 @@ export class App implements AfterViewInit {
             children.forEach((circle) => {
               angle += dangle;
               circle.style.transform = `rotate(${angle}deg) translate(${this.circleGraph.nativeElement.clientWidth / 2}px) rotate(-${angle}deg)`;
+              circle.style.opacity = '100%';
+              circle.classList.add('animate__animated');
             });
           }, 1000);
         }),

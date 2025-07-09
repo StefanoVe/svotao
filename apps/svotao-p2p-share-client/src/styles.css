@@ -1,4 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Bytesized&display=swap');
 @import 'tailwindcss';
+@import 'animate.css';
 
 @config "../tailwind.config.js";
+
+.smooth {
+  transition: all 0.3s ease-in-out;
+}

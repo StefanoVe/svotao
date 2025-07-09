@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import { bootstraps } from 'vecholib/backend';
 import { lm } from '../main';
 import { socketDisconnectEvent } from './events/socket.disconnect';
+import { socketFileUploadedEvent } from './events/socket.file-uploaded';
 export const socketIoAppEvents = (
   io: Server,
   socket: Socket,
@@ -11,6 +12,7 @@ export const socketIoAppEvents = (
   lm.log(`Socket connected with id ${socket.id}`, 'success');
 
   socketDisconnectEvent(io, socket, floorManager);
+  socketFileUploadedEvent(io, socket, floorManager);
 
   const headers = floorManager.getSocketHeaders<{
     id: string;

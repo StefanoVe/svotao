@@ -43,27 +43,37 @@ export class UserAvatarComponent implements OnInit, OnChanges {
     | 36
     | 42 = 10;
   @Input() textSize = 'md';
-  @Input() allowSwitch = false;
+  @Input() useRandomBackground = false;
 
   public showUsersCards = false;
 
   public tailwindSize = '';
+  public backgroundColor = '#000000';
 
   ngOnInit(): void {
+    this.backgroundColor = this._generateBackgroundColor();
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    this.updateTailwindSize();
+    this._updateTailwindSize();
   }
 
   ngOnChanges(): void {
     if (!isPlatformBrowser(this.platformId)) {
       return;
     }
-    this.updateTailwindSize();
+    this._updateTailwindSize();
   }
 
-  private updateTailwindSize(): void {
+  private _updateTailwindSize(): void {
     this.tailwindSize = `size-${this.size}`;
+  }
+  private _generateBackgroundColor(): string {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+      color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
   }
 }

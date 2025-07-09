@@ -48,7 +48,7 @@
         <span>Room: {{socketData.room}}</span>
         <br />
         <span
-          >Peers: {{((socketio.roomData$ | async)?.sockets?.length || 0) -1
+          >Peers: {{((socketio.roomData$ | async)?.sockets?.length || 0)
           }}</span
         >
         <br />
@@ -71,7 +71,7 @@
       >
         <vecholib-upload
           [uploadLabel]="'Drag a file here or click/tap to upload.'"
-          (fileChanged)="file = $event"
+          (fileChanged)="file = $event; socketio.uploadFile($event.file) "
         ></vecholib-upload>
       </svotao-liquid-glass>
       <div
@@ -88,20 +88,71 @@
     <svotao-p2p-share-user-avatar
       [user]="socketData.userId"
       [showName]="false"
-      class="z-10 size-48 absolute"
+      class="z-10 size-48 absolute animate__zoomIn animate__animated"
       [selected]="true"
     ></svotao-p2p-share-user-avatar>
 
-    <div class="ciclegraph shrink-0" #CircleGraph>
-      @for (peer of (socketio.roomData$ | async)?.sockets; track $index) {
-      <div class="circle">
+    <div
+      class="ciclegraph shrink-0 animate__fadeInDown animate__animated animate__delay-1s"
+      #CircleGraph
+      *ngIf="socketio.roomData$ | async as roomData"
+    >
+      @for (peer of roomData?.sockets; track $index) {
+
+      <div class="circle group/file opacity-0">
         <div class="float-avatar">
+          <!-- USER AVATAR -->
           <svotao-p2p-share-user-avatar
             [user]="peer.id"
             [showName]="false"
+            [useRandomBackground]="true"
           ></svotao-p2p-share-user-avatar>
+          <!-- FILENAME -->
+          <svotao-liquid-glass
+            *ngIf="roomData.socketsData[peer.id]?.file?.size"
+            type="host"
+            [selected]="false"
+            class="absolute top-0 left-[80%] text-white shrink-0"
+            containerClass="flex  items-center justify-start shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/file:!w-96"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              class="size-6 shrink-0"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625ZM7.5 15a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 7.5 15Zm.75 2.25a.75.75 0 0 0 0 1.5H12a.75.75 0 0 0 0-1.5H8.25Z"
+                clip-rule="evenodd"
+              />
+              <path
+                d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z"
+              />
+            </svg>
+            <span
+              class="opacity-0 size-0 group-hover/file:static group-hover/file:opacity-100 group-hover/file:size-full smooth pointer-events-none truncate mx-2 shrink group-hover/file:delay-300"
+            >
+              {{roomData.socketsData[peer.id].file.name|| 'File'}}
+            </span>
+          </svotao-liquid-glass>
+          <!-- FILE SIZE -->
+          <svotao-liquid-glass
+            *ngIf="roomData.socketsData[peer.id]?.file?.size"
+            type="card"
+            [selected]="false"
+            class="absolute top-10 left-[80%] text-white shrink-0 scale-75 opacity-0 group-hover/file:opacity-100"
+            containerClass="flex  items-center justify-start shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/file:!w-24 smooth delay-300"
+          >
+            <span
+              class="absolute w-4 group-hover/file:static group-hover/file:w-full smooth pointer-events-none truncate mx-2 shrink font-bytesized text-lg"
+            >
+              {{roomData.socketsData[peer.id].file.size | filesize}}
+            </span>
+          </svotao-liquid-glass>
         </div>
       </div>
+
       }
     </div>
     <!-- <div

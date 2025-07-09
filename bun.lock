@@ -18,13 +18,14 @@
         "@tailwindcss/postcss": "^4.1.11",
         "@types/bun": "^1.2.18",
         "angular-tabler-icons": "^3.26.0",
+        "animate.css": "^4.1.1",
         "axios": "^1.10.0",
         "d3": "^7.9.0",
         "express": "^5.1.0",
         "ngx-toast": "^1.1.4",
         "rxjs": "~7.8.2",
         "socket.io": "^4.8.1",
-        "vecholib": "^1.6.9",
+        "vecholib": "^1.7.1",
         "zone.js": "~0.15.1",
       },
       "devDependencies": {
@@ -1228,6 +1229,8 @@
     "angular-eslint": ["angular-eslint@20.1.1", "", { "dependencies": { "@angular-devkit/core": ">= 20.0.0 < 21.0.0", "@angular-devkit/schematics": ">= 20.0.0 < 21.0.0", "@angular-eslint/builder": "20.1.1", "@angular-eslint/eslint-plugin": "20.1.1", "@angular-eslint/eslint-plugin-template": "20.1.1", "@angular-eslint/schematics": "20.1.1", "@angular-eslint/template-parser": "20.1.1", "@typescript-eslint/types": "^8.0.0", "@typescript-eslint/utils": "^8.0.0" }, "peerDependencies": { "eslint": "^8.57.0 || ^9.0.0", "typescript": "*", "typescript-eslint": "^8.0.0" } }, "sha512-sJ/7vdBMmmYGq5054UHfBXCWHABo79bPbNiXVznqBu6mV85RZsT+IBV1JKLHmV4JtfHoNx1ElkSL2hR3ZeJbkQ=="],
 
     "angular-tabler-icons": ["angular-tabler-icons@3.26.0", "", { "dependencies": { "tslib": "^2.8.1" }, "peerDependencies": { "@angular/common": "17 - 19", "@angular/core": "17 - 19" } }, "sha512-gOvELHvz9TgOXAVq1YDqPQ8Z+0kII4IETzKn95x//zdZ5//3RekpeAJE2go3zczXaxoy44frmea7i7mr40BDTw=="],
+
+    "animate.css": ["animate.css@4.1.1", "", {}, "sha512-+mRmCTv6SbCmtYJCN4faJMNFVNN5EuCTTprDTAo7YzIGji2KADmakjVA3+8mVDkZ2Bf09vayB35lSQIex2+QaQ=="],
 
     "anser": ["anser@2.3.2", "", {}, "sha512-PMqBCBvrOVDRqLGooQb+z+t1Q0PiPyurUQeZRR5uHBOVZcW8B04KMmnT12USnhpNX2wCPagWzLVppQMUG3u0Dw=="],
 
@@ -2909,7 +2912,7 @@
 
     "vary": ["vary@1.1.2", "", {}, "sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg=="],
 
-    "vecholib": ["vecholib@1.6.9", "", { "peerDependencies": { "@angular/animations": "^20.0.6", "@angular/common": "^20.0.5", "@angular/compiler": "^20.0.5", "@angular/core": "^20.0.5", "@angular/forms": "^20.0.5", "@angular/platform-browser": "^20.0.5", "@angular/platform-browser-dynamic": "^20.0.5", "@angular/router": "^20.0.5", "@tailwindcss/postcss": "^4.1.11", "date-fns": "^4.1.0", "dropzone": "github:StefanoVe/dropzone", "ngx-device-detector": "^10.0.2", "ngx-dropzone": "^3.1.0", "ngx-mask": "^19.0.7", "ngx-toastr": "^19.0.0", "postcss": "^8.5.6", "rxjs": "~7.8.2", "socket.io-client": "^4.8.1", "tailwindcss": "^4.1.11", "tslib": "^2.8.1", "zone.js": "~0.15.1" } }, "sha512-/McsNvlB26WH1NQ5n3f+QeyfGvnACMTy7BQxGtUMBVOIRYDf4de0c5o4zxm8T/miGBcaGtDolc8cBcFP/XmtRQ=="],
+    "vecholib": ["vecholib@1.7.1", "", { "peerDependencies": { "@angular/animations": "^20.0.6", "@angular/common": "^20.0.5", "@angular/compiler": "^20.0.5", "@angular/core": "^20.0.5", "@angular/forms": "^20.0.5", "@angular/platform-browser": "^20.0.5", "@angular/platform-browser-dynamic": "^20.0.5", "@angular/router": "^20.0.5", "@tailwindcss/postcss": "^4.1.11", "date-fns": "^4.1.0", "dropzone": "github:StefanoVe/dropzone", "ngx-device-detector": "^10.0.2", "ngx-dropzone": "^3.1.0", "ngx-mask": "^19.0.7", "ngx-toastr": "^19.0.0", "postcss": "^8.5.6", "rxjs": "~7.8.2", "socket.io-client": "^4.8.1", "tailwindcss": "^4.1.11", "tslib": "^2.8.1", "zone.js": "~0.15.1" } }, "sha512-TT6WPjNkpK88KiWy8VpQoR19X9DRTEz7FzIOaa38rk8x3v34Feuooo/Sgys0R4tPDQYuDfX+ewzunhxjEvQffQ=="],
 
     "vite": ["vite@6.3.5", "", { "dependencies": { "esbuild": "^0.25.0", "fdir": "^6.4.4", "picomatch": "^4.0.2", "postcss": "^8.5.3", "rollup": "^4.34.9", "tinyglobby": "^0.2.13" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^18.0.0 || ^20.0.0 || >=22.0.0", "jiti": ">=1.21.0", "less": "*", "lightningcss": "^1.21.0", "sass": "*", "sass-embedded": "*", "stylus": "*", "sugarss": "*", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "jiti", "less", "lightningcss", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-cZn6NDFE7wdTpINgs++ZJ4N49W2vRp8LCKrn3Ob1kYNtOo21vfDoaV5GzBfLU4MovSAB8uNRm4jgzVQZ+mBzPQ=="],
 
