@@ -17,6 +17,7 @@ export class SocketService extends SocketConnectionHandlerService {
   public roomData$ = new ReplaySubject<
     IFloorManagerRoom<{
       file: { name: string; size: number };
+      backgroundColor: string;
     }>
   >(1);
   override appEvents(): void {

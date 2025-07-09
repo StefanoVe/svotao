@@ -4,7 +4,7 @@
     [selected]="selected"
     class="rounded-full"
     [ngStyle]="
-      useRandomBackground ? { 'background-color': backgroundColor } : {}
+      backgroundColor.length ? { 'background-color': backgroundColor } : {}
     "
     containerClass=" size-full flex justify-center items-center cursor-pointer "
     [title]="user"

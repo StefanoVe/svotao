@@ -1,6 +1,7 @@
 import { EnumSocketIOAppEvents } from '@svotao/interfaces';
 import { Server, Socket } from 'socket.io';
 import { bootstraps } from 'vecholib/backend';
+import { generateColorFromSeed } from 'vecholib/functions';
 import { lm } from '../main';
 import { socketDisconnectEvent } from './events/socket.disconnect';
 import { socketFileUploadedEvent } from './events/socket.file-uploaded';
@@ -25,6 +26,9 @@ export const socketIoAppEvents = (
     Math.random().toString(36).substring(2, 15);
 
   floorManager.addSocketToRoom(socket, room);
+  floorManager.editRoomSocketData(socket, {
+    backgroundColor: generateColorFromSeed(userId).toHex(true),
+  });
   const roomData = floorManager.getRoom(room);
 
   lm.log(`Socket ${socket.id} added to room ${room}`, 'success');

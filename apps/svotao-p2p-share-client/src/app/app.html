@@ -2,6 +2,7 @@
   <!-- <h1 class="text-white font-extrabold text-3xl">Svotao P2P file sharing</h1> -->
   @if (socketio.socketData$ | async; as socketData) {
   <div class="flex flex-col p-8 gap-2 gap-y-4 items-center">
+    <!-- ROOM AND SOCKET INFO -->
     <div class="flex items-center gap-2 group/connection">
       @if (roomUrl$ | async; as roomUrl) {
       <svotao-liquid-glass
@@ -82,30 +83,31 @@
   </div>
 
   <!-- CONNECTED PEERS -->
+  @if(socketio.roomData$ | async; as roomData) {
   <div
     class="flex flex-col p-8 gap-2 gap-y-4 items-center justify-center h-[70vh] overflow-y-hidden relative"
   >
     <svotao-p2p-share-user-avatar
       [user]="socketData.userId"
       [showName]="false"
-      class="z-10 size-48 absolute animate__zoomIn animate__animated"
-      [selected]="true"
+      class="z-10 size-48 absolute animate__zoomIn animate__animated pointer-events-none"
+      [selected]="false"
+      [backgroundColor]="roomData.socketsData[socketData.userId].backgroundColor || ''"
     ></svotao-p2p-share-user-avatar>
 
     <div
-      class="ciclegraph shrink-0 animate__fadeInDown animate__animated animate__delay-1s"
+      class="ciclegraph shrink-0 animate__zoomIn animate__animated animate__delay-1s"
       #CircleGraph
-      *ngIf="socketio.roomData$ | async as roomData"
     >
-      @for (peer of roomData?.sockets; track $index) {
+      @for (peer of roomData?.sockets; track peer.id) {
 
-      <div class="circle group/file opacity-0">
+      <div class="circle group/file opacity-0 !duration-500">
         <div class="float-avatar">
           <!-- USER AVATAR -->
           <svotao-p2p-share-user-avatar
             [user]="peer.id"
             [showName]="false"
-            [useRandomBackground]="true"
+            [backgroundColor]="roomData.socketsData[peer.id].backgroundColor || ''"
           ></svotao-p2p-share-user-avatar>
           <!-- FILENAME -->
           <svotao-liquid-glass
@@ -163,5 +165,5 @@
       <div class="rounded-full bg-blue-500 size-16"></div>
     </div> -->
   </div>
-  }
+  } }
 </div>

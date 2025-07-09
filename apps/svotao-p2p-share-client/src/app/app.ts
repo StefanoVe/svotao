@@ -82,11 +82,11 @@ export class App implements AfterViewInit {
             );
             const dangle = 360 / children.length;
 
-            children.forEach((circle) => {
+            children.forEach((circle, index) => {
               angle += dangle;
               circle.style.transform = `rotate(${angle}deg) translate(${this.circleGraph.nativeElement.clientWidth / 2}px) rotate(-${angle}deg)`;
               circle.style.opacity = '100%';
-              circle.classList.add('animate__animated');
+              circle.classList.add('smooth');
             });
           }, 1000);
         }),
