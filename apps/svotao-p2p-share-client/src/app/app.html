@@ -1,59 +1,116 @@
 <div class="p-2 text-white">
-  <h1 class="text-white font-extrabold text-3xl">Svotao file sharing</h1>
-  <p class="font-bytesized p-2 leading-3">
-    <span>Room: saidaisdn-ccsa</span>
-    <br />
-    <span>ID: {{ 'asdbuasduiasd'}}</span>
-    <br />
-    <span>Peers: 3</span>
-    <br />
-  </p>
-</div>
-<div class="flex flex-col items-center p-8 gap-2 gap-y-4">
-  <!-- UPLOAD BOX -->
-  <div>
-    <svotao-liquid-glass
-      type="card"
-      containerClass="size-[50vh] flex justify-center items-center"
-    >
-      <vecholib-upload
-        class=""
-        [uploadLabel]="'Drag a file here or click/tap to upload.'"
-      ></vecholib-upload>
-    </svotao-liquid-glass>
-  </div>
-  <svotao-liquid-glass
-    type="host"
-    [selected]="false"
-    class="w-[50vh]"
-    containerClass="h-16  w-full flex items-center justify-between !backdrop-brightness-100"
-  >
-    <span class="pl-4 truncate w-full"
-      >http://share.vecho.me/rooms/sapdoadpnas</span
-    >
-    <svotao-liquid-glass
-      type="host"
-      [selected]="false"
-      containerClass="cursor-pointer !backdrop-brightness-100 "
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        class="size-6"
+  <!-- <h1 class="text-white font-extrabold text-3xl">Svotao P2P file sharing</h1> -->
+  @if (socketio.socketData$ | async; as socketData) {
+  <div class="flex flex-col p-8 gap-2 gap-y-4 items-center">
+    <div class="flex items-center gap-2 group/connection">
+      @if (roomUrl$ | async; as roomUrl) {
+      <svotao-liquid-glass
+        type="host"
+        [selected]="false"
+        class="w-fit hover:w-[50vh] group/roomUrl absolute"
+        containerClass="h-15 w-15 smooth flex items-center justify-between !backdrop-brightness-100 group-hover/roomUrl:!w-[50vh] smooth shrink-0"
       >
-        <path
-          fill-rule="evenodd"
-          d="M17.663 3.118c.225.015.45.032.673.05C19.876 3.298 21 4.604 21 6.109v9.642a3 3 0 0 1-3 3V16.5c0-5.922-4.576-10.775-10.384-11.217.324-1.132 1.3-2.01 2.548-2.114.224-.019.448-.036.673-.051A3 3 0 0 1 13.5 1.5H15a3 3 0 0 1 2.663 1.618ZM12 4.5A1.5 1.5 0 0 1 13.5 3H15a1.5 1.5 0 0 1 1.5 1.5H12Z"
-          clip-rule="evenodd"
-        />
-        <path
-          d="M3 8.625c0-1.036.84-1.875 1.875-1.875h.375A3.75 3.75 0 0 1 9 10.5v1.875c0 1.036.84 1.875 1.875 1.875h1.875A3.75 3.75 0 0 1 16.5 18v2.625c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625v-12Z"
-        />
-        <path
-          d="M10.5 10.5a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963 5.23 5.23 0 0 0-3.434-1.279h-1.875a.375.375 0 0 1-.375-.375V10.5Z"
-        />
-      </svg>
-    </svotao-liquid-glass>
-  </svotao-liquid-glass>
+        <svotao-liquid-glass
+          type="host"
+          (click)="copyRoomUrl(roomUrl)"
+          [selected]="false"
+          containerClass="cursor-pointer !backdrop-brightness-100 "
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            class="size-6"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M17.663 3.118c.225.015.45.032.673.05C19.876 3.298 21 4.604 21 6.109v9.642a3 3 0 0 1-3 3V16.5c0-5.922-4.576-10.775-10.384-11.217.324-1.132 1.3-2.01 2.548-2.114.224-.019.448-.036.673-.051A3 3 0 0 1 13.5 1.5H15a3 3 0 0 1 2.663 1.618ZM12 4.5A1.5 1.5 0 0 1 13.5 3H15a1.5 1.5 0 0 1 1.5 1.5H12Z"
+              clip-rule="evenodd"
+            />
+            <path
+              d="M3 8.625c0-1.036.84-1.875 1.875-1.875h.375A3.75 3.75 0 0 1 9 10.5v1.875c0 1.036.84 1.875 1.875 1.875h1.875A3.75 3.75 0 0 1 16.5 18v2.625c0 1.035-.84 1.875-1.875 1.875h-9.75A1.875 1.875 0 0 1 3 20.625v-12Z"
+            />
+            <path
+              d="M10.5 10.5a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963 5.23 5.23 0 0 0-3.434-1.279h-1.875a.375.375 0 0 1-.375-.375V10.5Z"
+            />
+          </svg>
+        </svotao-liquid-glass>
+        <span
+          class="group-hover/roomUrl:pr-4 truncate w-0 pointer-events-none opacity-90 group-hover/roomUrl:w-auto smooth"
+          >{{roomUrl}}</span
+        >
+      </svotao-liquid-glass>
+      }
+      <div class="size-15 shrink-0"></div>
+      <p class="font-bytesized p-2 leading-3">
+        <span>ID: {{socketData.userId}}</span>
+        <br />
+        <span>Room: {{socketData.room}}</span>
+        <br />
+        <span
+          >Peers: {{((socketio.roomData$ | async)?.sockets?.length || 0) -1
+          }}</span
+        >
+        <br />
+      </p>
+    </div>
+
+    <!-- UPLOAD BOX -->
+    <div
+      class="relative p-3 group/upload flex flex-col justify-center items-center"
+    >
+      <div
+        class="pointer-events-none size-[14vh] shrink-0 animate-rotating-border absolute top-0 left-0 z-10 group-hover/upload:opacity-0 smooth delay-300 group-hover/upload:delay-0"
+        *ngIf="!!file.file?.name?.length"
+      ></div>
+      <svotao-liquid-glass
+        type="host"
+        class="absolute origin-right z-10"
+        [selected]="!!file.file?.name?.length"
+        containerClass=" {{!!file.file?.name?.length ? 'size-[12vh] group-hover/upload:size-[20vh] !pointer-events-auto' : 'h-[10vh]  w-[50vh]'}} smooth  flex justify-center items-center overflow-hidden m-1 z-10"
+      >
+        <vecholib-upload
+          [uploadLabel]="'Drag a file here or click/tap to upload.'"
+          (fileChanged)="file = $event"
+        ></vecholib-upload>
+      </svotao-liquid-glass>
+      <div
+        class="opacity-0 pointer-events-none"
+        [ngClass]="!!file.file?.name?.length ? 'size-[12vh] !pointer-events-auto' : 'h-[10vh]  w-[50vh]'"
+      ></div>
+    </div>
+  </div>
+
+  <!-- CONNECTED PEERS -->
+  <div
+    class="flex flex-col p-8 gap-2 gap-y-4 items-center justify-center h-[70vh] overflow-y-hidden relative"
+  >
+    <svotao-p2p-share-user-avatar
+      [user]="socketData.userId"
+      [showName]="false"
+      class="z-10 size-48 absolute"
+      [selected]="true"
+    ></svotao-p2p-share-user-avatar>
+
+    <div class="ciclegraph shrink-0" #CircleGraph>
+      @for (peer of (socketio.roomData$ | async)?.sockets; track $index) {
+      <div class="circle">
+        <div class="float-avatar">
+          <svotao-p2p-share-user-avatar
+            [user]="peer.id"
+            [showName]="false"
+          ></svotao-p2p-share-user-avatar>
+        </div>
+      </div>
+      }
+    </div>
+    <!-- <div
+      class="absolute size-96 bg-red-500 z-0 grid grid-cols-2 gridcols rounded-full aspect-square"
+    >
+      <div class="rounded-full bg-blue-500 size-16"></div>
+      <div class="rounded-full bg-blue-500 size-16"></div>
+      <div class="rounded-full bg-blue-500 size-16"></div>
+    </div> -->
+  </div>
+  }
 </div>

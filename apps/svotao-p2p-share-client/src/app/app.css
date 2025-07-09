@@ -3,3 +3,64 @@
 :host ::ng-deep vecholib-upload ngx-dropzone {
   @apply text-gray-50 !bg-transparent backdrop-brightness-105  size-[50vh] aspect-square border-none;
 }
+
+.animate-rotating-border {
+  @apply border-2 border-dashed border-white rounded-full;
+
+  animation: rotatingBorder 20s linear infinite;
+}
+
+@keyframes rotatingBorder {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.ciclegraph {
+  position: relative;
+  width: 500px;
+  height: 500px;
+  margin: calc(100px / 2 + 0px);
+}
+
+.ciclegraph:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 2px dashed white;
+  width: calc(100% - 2px * 2);
+  height: calc(100% - 2px * 2);
+  border-radius: 50%;
+  animation: rotatingBorder 80s linear infinite;
+}
+
+.ciclegraph .circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100px;
+  height: 100px;
+  margin: calc(-100px / 2);
+
+  border-radius: 50%;
+}
+
+.float-avatar {
+  animation: floatingAvatar 3s ease-in-out infinite;
+}
+
+@keyframes floatingAvatar {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

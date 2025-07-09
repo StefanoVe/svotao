@@ -8,6 +8,7 @@ import {
   provideClientHydration,
   withEventReplay,
 } from '@angular/platform-browser';
+import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import {
   provideTailwindForms,
@@ -15,7 +16,6 @@ import {
 } from 'vecholib/angular/modules';
 import { provideSocketConnectionHandlerService } from 'vecholib/angular/services';
 import { appRoutes } from './app.routes';
-
 export const appConfig: ApplicationConfig = {
   providers: [
     provideClientHydration(withEventReplay()),
@@ -23,6 +23,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes),
     provideTailwindForms({}),
+    provideAnimations(),
     provideHttpClient(withFetch()),
     provideTailwindToasts(),
     provideSocketConnectionHandlerService({

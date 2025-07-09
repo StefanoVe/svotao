@@ -1,0 +1,30 @@
+<div class="flex items-center flex-col size-full justify-center">
+  <svotao-liquid-glass
+    type="host"
+    [selected]="selected"
+    containerClass=" size-full flex justify-center items-center cursor-pointer"
+    [title]="user"
+  >
+    <img
+      src="https://api.dicebear.com/9.x/big-smile/svg?seed={{ user }}"
+      class="p-2 size-full"
+      alt="{{ user }} avatar "
+    />
+  </svotao-liquid-glass>
+
+  <div class="ml-3" *ngIf="showName">
+    <div class="text-{{ textSize }} text-gray-200 tracking-wider">
+      {{ user | titlecase }}
+    </div>
+    <div
+      class="text-xs text-gray-50/50 tracking-widest font-medium uppercase"
+      *ngIf="userSubtext?.length"
+    >
+      {{
+        userSubtext.length > 15
+          ? (userSubtext | slice: 0 : 15) + '...'
+          : userSubtext
+      }}
+    </div>
+  </div>
+</div>

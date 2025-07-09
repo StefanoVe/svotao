@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "p2p:client": "nx serve svotao-p2p-share-client",
+    "p2p:client": "nx serve svotao-p2p-share-client --no-hmr",
     "p2p:server": "nx serve svotao-share-api"
   },
   "keywords": [],
@@ -75,10 +75,12 @@
     "@types/bun": "^1.2.18",
     "angular-tabler-icons": "^3.26.0",
     "axios": "^1.10.0",
+    "d3": "^7.9.0",
     "express": "^5.1.0",
+    "ngx-toast": "^1.1.4",
     "rxjs": "~7.8.2",
     "socket.io": "^4.8.1",
-    "vecholib": "^1.6.4-beta.6",
+    "vecholib": "^1.6.9",
     "zone.js": "~0.15.1"
   }
 }

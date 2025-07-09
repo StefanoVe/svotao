@@ -1,3 +1,4 @@
+import { EnumSocketIOAppEvents } from '@svotao/interfaces';
 import { Server, Socket } from 'socket.io';
 import { bootstraps } from 'vecholib/backend';
 import { lm } from '../main';
@@ -11,5 +12,34 @@ export const socketIoAppEvents = (
 
   socketDisconnectEvent(io, socket, floorManager);
 
-  // Add more event listeners as needed
+  const headers = floorManager.getSocketHeaders<{
+    id: string;
+    user: `{ room: string }`;
+  }>(socket);
+  const userId = headers.agent.id;
+
+  const room =
+    JSON.parse(headers.user).room ||
+    Math.random().toString(36).substring(2, 15);
+
+  floorManager.addSocketToRoom(socket, room);
+  const roomData = floorManager.getRoom(room);
+
+  lm.log(`Socket ${socket.id} added to room ${room}`, 'success');
+  lm.log(
+    `${roomData.sockets.length - 1} other sockets in room ${room}`,
+    'info',
+  );
+  lm.log(`==================================`, 'end');
+
+  socket.emit(EnumSocketIOAppEvents.SocketReady, {
+    room,
+    userId,
+    peers: roomData.sockets.length - 1,
+  });
+
+  io.in(room).emit(EnumSocketIOAppEvents.RoomUpdated, {
+    ...roomData,
+    sockets: roomData.sockets,
+  });
 };

@@ -1,11 +1,23 @@
-import { afterNextRender, Component, inject } from '@angular/core';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { AsyncPipe, CommonModule, isPlatformBrowser } from '@angular/common';
+import {
+  afterNextRender,
+  AfterViewInit,
+  Component,
+  ElementRef,
+  inject,
+  PLATFORM_ID,
+  ViewChild,
+} from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+
+import { map, tap } from 'rxjs';
 import {
   LiquidGlassContainer,
   UploadComponent,
 } from 'vecholib/angular/components';
-import { TailwindFormsModule } from 'vecholib/angular/modules';
+import { TailwindFormsModule, ToastrService } from 'vecholib/angular/modules';
+import { environment } from '../environments/environment';
+import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { SocketService } from './services/socket.service';
 @Component({
   imports: [
@@ -13,25 +25,84 @@ import { SocketService } from './services/socket.service';
     LiquidGlassContainer,
     TailwindFormsModule,
     UploadComponent,
+    AsyncPipe,
+    CommonModule,
+    UserAvatarComponent,
   ],
   selector: 'svotao-p2p-share-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
 })
-export class App {
-  private _socketio = inject(SocketService);
-  public form = new FormGroup({
-    file: new FormArray([
-      new FormGroup({
-        description: new FormControl('', Validators.required),
-        checked: new FormControl(false),
-      }),
-    ]),
-  });
+export class App implements AfterViewInit {
+  @ViewChild('CircleGraph') circleGraph!: ElementRef<HTMLDivElement>;
+  public socketio = inject(SocketService);
+  private _toastr = inject(ToastrService);
+  private _router = inject(Router);
+  private _platformId = inject(PLATFORM_ID);
+
+  public roomUrl$ = this.socketio.socketData$.pipe(
+    map((data) => `${environment.appUrl}/s/rooms/${data.room}`),
+    tap(),
+  );
+
+  public file: { file: File | null; blob: string | ArrayBuffer | null } = {
+    file: null,
+    blob: null,
+  };
 
   constructor() {
     afterNextRender(() => {
-      this._socketio.connect('client');
+      const room = this._getRoomId();
+
+      this.socketio.connect(undefined, {
+        room,
+      });
+
+      this.socketio.socketData$.subscribe((data) => {
+        this._router.navigate(['s', 'rooms', data.room]);
+      });
     });
+  }
+
+  ngAfterViewInit(): void {
+    if (!isPlatformBrowser(this._platformId)) {
+      return;
+    }
+
+    this.socketio.roomData$
+      .pipe(
+        tap((data) => {
+          setTimeout(() => {
+            let angle = 360 - 90;
+            const children = Array.from(
+              this.circleGraph.nativeElement
+                .children as HTMLCollectionOf<HTMLDivElement>,
+            );
+            const dangle = 360 / children.length;
+
+            children.forEach((circle) => {
+              angle += dangle;
+              circle.style.transform = `rotate(${angle}deg) translate(${this.circleGraph.nativeElement.clientWidth / 2}px) rotate(-${angle}deg)`;
+            });
+          }, 1000);
+        }),
+      )
+      .subscribe();
+  }
+
+  public copyRoomUrl(url: string): void {
+    navigator.clipboard.writeText(url).then(
+      () => this._toastr.success('Room URL copied to clipboard!'),
+      (err) => console.error('Failed to copy room URL:', err),
+    );
+  }
+
+  private _getRoomId() {
+    const fragments = location.href.split('/');
+
+    const roomId = fragments[fragments.length - 1];
+    console.log(`Room ID: ${roomId}`);
+
+    return roomId === 'new' ? undefined : roomId;
   }
 }
