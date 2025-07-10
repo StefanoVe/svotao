@@ -4,6 +4,11 @@
   @apply text-gray-50 !bg-transparent backdrop-brightness-105  size-[50vh] aspect-square border-none;
 }
 
+:host ::ng-deep vecholib-upload ngx-dropzone ngx-dropzone-preview {
+  background-image: none !important;
+  color: white !important;
+  @apply border border-dashed border-white !rounded-full aspect-square !text-white !size-44;
+}
 .animate-rotating-border {
   @apply border-2 border-dashed border-white rounded-full;
 
