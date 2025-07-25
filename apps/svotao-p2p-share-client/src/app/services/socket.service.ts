@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { EnumSocketIOAppEvents } from '@svotao/interfaces';
-import { ReplaySubject, tap } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, tap } from 'rxjs';
 import { SocketConnectionHandlerService } from 'vecholib/angular/services';
 import { IFloorManagerRoom } from 'vecholib/interfaces';
 export interface ISocketReadyData {
@@ -13,7 +13,9 @@ export interface ISocketReadyData {
   providedIn: 'root',
 })
 export class SocketService extends SocketConnectionHandlerService {
-  public socketData$ = new ReplaySubject<ISocketReadyData>(1);
+  public socketData$ = new BehaviorSubject<ISocketReadyData>(
+    <ISocketReadyData>{},
+  );
   public roomData$ = new ReplaySubject<
     IFloorManagerRoom<{
       file: { name: string; size: number };
@@ -47,12 +49,19 @@ export class SocketService extends SocketConnectionHandlerService {
     );
   }
 
-  public uploadFile(file: File | null): void {
-    console.log('Uploading file:', file);
+  public publishFileData(file: File | null): void {
+    console.log('Publishing file:', file);
     this.socket.emit(EnumSocketIOAppEvents.FileUploaded, {
       name: file?.name,
       size: file?.size,
       type: file?.type,
+    });
+  }
+
+  public requestFile(peerId: string): void {
+    console.log('Requesting file from peer:', peerId);
+    this.socket.emit(EnumSocketIOAppEvents.RequestFile, {
+      peerId,
     });
   }
 }

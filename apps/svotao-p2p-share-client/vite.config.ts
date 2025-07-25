@@ -4,4 +4,11 @@ export default {
       'rxjs/Subject': 'rxjs',
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        charset: false,
+      },
+    },
+  },
 };

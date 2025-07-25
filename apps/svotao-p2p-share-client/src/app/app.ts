@@ -20,6 +20,7 @@ import { environment } from '../environments/environment';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { FileSizePipe } from './pipes/filesize.pipe';
 import { SocketService } from './services/socket.service';
+import { WebRTCService } from './services/webrtc.service';
 @Component({
   imports: [
     RouterModule,
@@ -39,6 +40,7 @@ export class App implements AfterViewInit {
   @ViewChild('CircleGraph') circleGraph!: ElementRef<HTMLDivElement>;
   public socketio = inject(SocketService);
   private _toastr = inject(ToastrService);
+  private _webrtc = inject(WebRTCService);
   private _router = inject(Router);
   private _platformId = inject(PLATFORM_ID);
 
@@ -73,7 +75,7 @@ export class App implements AfterViewInit {
 
     this.socketio.roomData$
       .pipe(
-        tap((data) => {
+        tap(() => {
           setTimeout(() => {
             let angle = 360 - 90;
             const children = Array.from(
@@ -82,7 +84,7 @@ export class App implements AfterViewInit {
             );
             const dangle = 360 / children.length;
 
-            children.forEach((circle, index) => {
+            children.forEach((circle) => {
               angle += dangle;
               circle.style.transform = `rotate(${angle}deg) translate(${this.circleGraph.nativeElement.clientWidth / 2}px) rotate(-${angle}deg)`;
               circle.style.opacity = '100%';
@@ -99,6 +101,17 @@ export class App implements AfterViewInit {
       () => this._toastr.success('Room URL copied to clipboard!'),
       (err) => console.error('Failed to copy room URL:', err),
     );
+  }
+
+  public publishFile(event: (typeof this)['file']) {
+    this.file = event;
+    this._webrtc.createDataChannel({
+      user: this.socketio.socketData$.value.userId,
+      fileName: this.file.file?.name || '',
+      room: this.socketio.socketData$.value.room,
+    });
+
+    this.socketio.publishFileData(this.file.file);
   }
 
   private _getRoomId() {
