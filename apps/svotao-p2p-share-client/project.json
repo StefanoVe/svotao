@@ -94,6 +94,13 @@
         "staticFilePath": "dist/apps/svotao-p2p-share-client/browser",
         "spa": true
       }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "cp ./apps/svotao-p2p-share-client/Dockerfile ./dist/apps/svotao-p2p-share-client && cp ./apps/svotao-p2p-share-client/captain-definition ./dist/apps/svotao-p2p-share-client && tar --strip-components=4 -cvf ./deploy.tar --exclude='*.map' ./dist/apps/svotao-p2p-share-client/* && caprover deploy -t ./deploy.tar -n notify -a p2p-client && rm ./deploy.tar"
+      }
     }
   }
 }

@@ -45,7 +45,7 @@ export class App implements AfterViewInit {
   private _platformId = inject(PLATFORM_ID);
 
   public roomUrl$ = this.socketio.socketData$.pipe(
-    map((data) => `${environment.appUrl}/s/rooms/${data.room}`),
+    map((data) => `${environment.clientUrl}/s/rooms/${data.room}`),
     tap(),
   );
 

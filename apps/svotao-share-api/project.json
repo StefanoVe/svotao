@@ -12,11 +12,11 @@
         "platform": "node",
         "outputPath": "dist/apps/svotao-share-api",
         "format": ["cjs"],
-        "bundle": false,
+        "bundle": true,
         "main": "apps/svotao-share-api/src/main.ts",
         "tsConfig": "apps/svotao-share-api/tsconfig.app.json",
         "assets": ["apps/svotao-share-api/src/assets"],
-        "generatePackageJson": true,
+        "generatePackageJson": false,
         "esbuildOptions": {
           "sourcemap": true,
           "outExtension": {
@@ -53,7 +53,15 @@
           "buildTarget": "svotao-share-api:build:production"
         }
       }
+    },
+    "deploy": {
+      "executor": "nx:run-commands",
+      "outputs": [],
+      "options": {
+        "command": "cp ./apps/svotao-share-api/Dockerfile ./dist/apps/svotao-share-api && cp ./apps/svotao-share-api/captain-definition ./dist/apps/svotao-share-api && tar --strip-components=4 -cvf ./deploy.tar --exclude='*.map' ./dist/apps/svotao-share-api/* && caprover deploy -t ./deploy.tar -n notify -a p2p-api && rm ./deploy.tar"
+      }
     }
   },
+
   "tags": []
 }

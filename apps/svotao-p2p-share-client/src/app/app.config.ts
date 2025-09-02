@@ -15,6 +15,7 @@ import {
   provideTailwindToasts,
 } from 'vecholib/angular/modules';
 import { provideSocketConnectionHandlerService } from 'vecholib/angular/services';
+import { environment } from '../environments/environment';
 import { appRoutes } from './app.routes';
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -27,7 +28,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
     provideTailwindToasts(),
     provideSocketConnectionHandlerService({
-      url: 'http://localhost:3000',
+      url: environment.apiUrl,
       secure: true,
     }),
   ],

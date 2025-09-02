@@ -5,7 +5,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "p2p:client": "nx serve svotao-p2p-share-client --no-hmr",
-    "p2p:server": "nx serve svotao-share-api"
+    "p2p:server": "nx serve svotao-share-api",
+    "deploy:p2p-client": "nx build svotao-p2p-share-client && nx deploy svotao-p2p-share-client",
+    "deploy:p2p-api": "nx build svotao-share-api && nx deploy svotao-share-api",
+    "release": "bun run deploy:p2p-client && bun run deploy:p2p-api"
   },
   "keywords": [],
   "author": "",
@@ -81,7 +84,7 @@
     "ngx-toast": "^1.1.4",
     "rxjs": "~7.8.2",
     "socket.io": "^4.8.1",
-    "vecholib": "^1.9.0",
+    "vecholib": "^1.9.4",
     "zone.js": "~0.15.1"
   }
 }
