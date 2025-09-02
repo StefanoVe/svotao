@@ -1,0 +1,49 @@
+@reference "tailwindcss";
+
+.pop-in-animation {
+  @apply opacity-0;
+  animation: pop-in 1ms ease-in-out forwards;
+
+  &.delay-1 {
+    animation-delay: 150ms;
+  }
+
+  &.delay-2 {
+    animation-delay: 300ms;
+  }
+
+  &.delay-3 {
+    animation-delay: 450ms;
+  }
+
+  &.delay-4 {
+    animation-delay: 600ms;
+  }
+
+  &.delay-5 {
+    animation-delay: 750ms;
+  }
+
+  &.delay-6 {
+    animation-delay: 900ms;
+  }
+
+  &.delay-7 {
+    animation-delay: 1050ms;
+  }
+  &.delay-8 {
+    animation-delay: 1200ms;
+  }
+  &.delay-9 {
+    animation-delay: 1350ms;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0%;
+  }
+  100% {
+    opacity: 100%;
+  }
+}

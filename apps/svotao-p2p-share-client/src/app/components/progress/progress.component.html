@@ -1,0 +1,34 @@
+<div class="text-sm font-bytesized text-white p-8">
+  <div class="flex items-center gap-2">
+    <div class="w-10/12 bg-gray-800/29 rounded-full h-2.5">
+      <div
+        class="bg-white h-2.5 rounded-full"
+        [ngStyle]="{ width: progress.percentage + '%' }"
+      ></div>
+    </div>
+    <p>{{ progress.percentage | number: '1.0-2' }}%</p>
+  </div>
+  <p class="pop-in-animation delay-1">
+    {{ progress.file.name }}
+  </p>
+  <p class="pop-in-animation delay-2">
+    {{ progress.file.size | number: '1.0-2' }} Bytes
+  </p>
+
+  @if (progress.percentage === 100) {
+    <p class="pop-in-animation">Complete!</p>
+  } @else {
+    <p class="pop-in-animation delay-3">
+      {{ downloadSpeed | number: '1.0-2' }} Bytes/ms
+    </p>
+  }
+
+  <p class="pop-in-animation delay-4">------------------------------</p>
+  <p class="pop-in-animation delay-5">
+    Direction: {{ progress.handshake.direction }}
+    <br />
+    Source: {{ progress.handshake.from }}
+    <br />
+    Destination: {{ progress.handshake.to }}
+  </p>
+</div>

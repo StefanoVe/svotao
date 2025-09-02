@@ -1,20 +1,32 @@
-import { inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { Subject } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { BehaviorSubject, Subject } from 'rxjs';
+
+interface IWebRTCHandshake {
+  to: string | null;
+  from: string | null;
+  direction: 'inbound' | 'outbound';
+  status?: 'offering' | 'answered';
+}
+
+export interface IWebRTCProgress {
+  handshake: IWebRTCHandshake;
+  percentage: number;
+  file: {
+    name: string;
+    size: number;
+    mime: string;
+  };
+}
 
 @Injectable({ providedIn: 'root' })
 export class WebRTCService {
-  private _platformId = inject(PLATFORM_ID);
   peer!: RTCPeerConnection;
   channel: RTCDataChannel | null = null;
-  handshake: {
-    to: string | null;
-    from: string | null;
-    direction: 'inbound' | 'outbound';
-    status?: 'offering' | 'answered';
-  } | null = null;
+  handshake: IWebRTCHandshake | null = null;
   publishedFile: File | null = null;
 
   public iceCandidates$ = new Subject<RTCIceCandidateInit>();
+  public progress$ = new BehaviorSubject<IWebRTCProgress | null>(null);
 
   createDataChannel(config: {
     sourceUser: string;
@@ -115,8 +127,19 @@ export class WebRTCService {
         this.channel.send(slice);
         sent += slice.byteLength;
         offset += chunkSize;
-        // opzionale: emetti progress event (es. via Subject)
-        console.log('send progress', (sent / file.size) * 100);
+
+        const progress = (sent / file.size) * 100;
+
+        this.progress$.next({
+          handshake: <IWebRTCHandshake>this.handshake,
+          percentage: progress,
+          file: {
+            name: this.publishedFile?.name || '',
+            size: this.publishedFile?.size || 0,
+            mime: this.publishedFile?.type || '',
+          },
+        });
+        console.log('send progress', progress);
       }
     }
 
@@ -124,7 +147,10 @@ export class WebRTCService {
     this.channel.send(JSON.stringify({ type: 'end' }));
     this.handshake = null;
     this.channel = null;
-    // this.peer.close();
+
+    setTimeout(() => {
+      this.progress$.next(null);
+    }, 10000);
 
     console.log('file sent');
   }
@@ -204,6 +230,7 @@ export class WebRTCService {
               type: currentMeta?.mime || 'application/octet-stream',
             });
             const url = URL.createObjectURL(blob);
+
             console.log(
               'File received:',
               currentMeta?.name,
@@ -231,7 +258,19 @@ export class WebRTCService {
       if (ab) {
         chunks.push(ab);
         received += ab.byteLength;
-        console.log('receive progress', (received / (expectedSize || 1)) * 100);
+
+        const progress = (received / (expectedSize || 1)) * 100;
+
+        this.progress$.next({
+          handshake: <IWebRTCHandshake>this.handshake,
+          percentage: progress,
+          file: {
+            name: currentMeta?.name || '',
+            size: currentMeta?.size || 0,
+            mime: currentMeta?.mime || '',
+          },
+        });
+        console.log('receive progress', progress);
       }
     };
     this.channel.onclose = () => console.log('DataChannel closed');

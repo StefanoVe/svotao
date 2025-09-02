@@ -1,3 +1,11 @@
+<!-- PROGRESS -->
+@if(webrtc.progress$ | async; as progress) {
+<svotao-p2p-share-progress
+  [progress]="progress"
+  class="fixed top-0 left-0 z-50"
+></svotao-p2p-share-progress>
+}
+
 <div class="p-2 text-white min-h-screen">
   <!-- <h1 class="text-white font-extrabold text-3xl">Svotao P2P file sharing</h1> -->
   @if (socketio.socketData$ | async; as socketData) {
@@ -38,7 +46,7 @@
         </svotao-liquid-glass>
         <span
           class="group-hover/roomUrl:pr-4 truncate w-0 pointer-events-none opacity-90 group-hover/roomUrl:w-auto smooth"
-          >{{roomUrl}}</span
+          >{{roomUrl.replace('https://', '').replace('http://', '')}}</span
         >
       </svotao-liquid-glass>
       }

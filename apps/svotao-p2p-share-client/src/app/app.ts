@@ -17,6 +17,7 @@ import {
 } from 'vecholib/angular/components';
 import { TailwindFormsModule, ToastrService } from 'vecholib/angular/modules';
 import { environment } from '../environments/environment';
+import { ProgressComponent } from './components/progress/progress.component';
 import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 import { FileSizePipe } from './pipes/filesize.pipe';
 import { SocketService } from './services/socket.service';
@@ -31,6 +32,7 @@ import { WebRTCService } from './services/webrtc.service';
     CommonModule,
     UserAvatarComponent,
     FileSizePipe,
+    ProgressComponent,
   ],
   selector: 'svotao-p2p-share-root',
   templateUrl: './app.html',
@@ -39,8 +41,8 @@ import { WebRTCService } from './services/webrtc.service';
 export class App implements AfterViewInit {
   @ViewChild('CircleGraph') circleGraph!: ElementRef<HTMLDivElement>;
   public socketio = inject(SocketService);
+  public webrtc = inject(WebRTCService);
   private _toastr = inject(ToastrService);
-  private _webrtc = inject(WebRTCService);
   private _router = inject(Router);
   private _platformId = inject(PLATFORM_ID);
 
@@ -105,7 +107,7 @@ export class App implements AfterViewInit {
 
   public publishFile(event: (typeof this)['file']) {
     this.file = event;
-    this._webrtc.publishedFile = this.file.file;
+    this.webrtc.publishedFile = this.file.file;
     this.socketio.publishFileData(this.file.file);
   }
 
