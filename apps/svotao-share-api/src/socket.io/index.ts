@@ -1,10 +1,14 @@
-import { EnumSocketIOAppEvents } from '@svotao/interfaces';
+import { EnumSocketIOAppEvents, SocketioRoom } from '@svotao/interfaces';
 import { Server, Socket } from 'socket.io';
-import { bootstraps } from 'vecholib/backend';
+import { bootstraps, ISocketioFloorManager } from 'vecholib/backend';
 import { generateColorFromSeed } from 'vecholib/functions';
 import { lm } from '../main';
-import { socketDisconnectEvent } from './events/socket.disconnect';
-import { socketFileUploadedEvent } from './events/socket.file-uploaded';
+import { SOCKETIO_EVENTS } from './events';
+
+export type ContextualizedFloorManager = ISocketioFloorManager<
+  SocketioRoom['socketData']
+>;
+
 export const socketIoAppEvents = (
   io: Server,
   socket: Socket,
@@ -12,8 +16,7 @@ export const socketIoAppEvents = (
 ) => {
   lm.log(`Socket connected with id ${socket.id}`, 'success');
 
-  socketDisconnectEvent(io, socket, floorManager);
-  socketFileUploadedEvent(io, socket, floorManager);
+  SOCKETIO_EVENTS.forEach((callback) => callback(io, socket, floorManager));
 
   const headers = floorManager.getSocketHeaders<{
     id: string;
@@ -21,11 +24,17 @@ export const socketIoAppEvents = (
   }>(socket);
   const userId = headers.agent.id;
 
+  //join socket to a self room
+  socket.join(userId);
+
   const room =
     JSON.parse(headers.user).room ||
     Math.random().toString(36).substring(2, 15);
 
+  //add socket to room of peers
   floorManager.addSocketToRoom(socket, room);
+
+  //generate a background color for the socket's avatar
   floorManager.editRoomSocketData(socket, {
     backgroundColor: generateColorFromSeed(userId).toHex(true),
   });

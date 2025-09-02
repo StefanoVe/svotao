@@ -63,7 +63,7 @@ export class App implements AfterViewInit {
       });
 
       this.socketio.socketData$.subscribe((data) => {
-        this._router.navigate(['s', 'rooms', data.room]);
+        this._router.navigate(['s', 'rooms', data.room || '']);
       });
     });
   }
@@ -105,13 +105,16 @@ export class App implements AfterViewInit {
 
   public publishFile(event: (typeof this)['file']) {
     this.file = event;
-    this._webrtc.createDataChannel({
-      user: this.socketio.socketData$.value.userId,
-      fileName: this.file.file?.name || '',
-      room: this.socketio.socketData$.value.room,
-    });
-
+    this._webrtc.fileToSend = this.file.file;
     this.socketio.publishFileData(this.file.file);
+  }
+
+  public requestFile(peer: string, fileName: string) {
+    if (!fileName.length) {
+      return;
+    }
+
+    this.socketio.requestFile(peer);
   }
 
   private _getRoomId() {

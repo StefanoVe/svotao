@@ -81,7 +81,7 @@
     "ngx-toast": "^1.1.4",
     "rxjs": "~7.8.2",
     "socket.io": "^4.8.1",
-    "vecholib": "^1.8.3",
+    "vecholib": "^1.9.0",
     "zone.js": "~0.15.1"
   }
 }

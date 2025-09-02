@@ -103,8 +103,8 @@
 
       <div
         class="circle group/file opacity-0 !duration-500"
-        (click)="socketio.requestFile(peer.id)"
-        (keyup.enter)="socketio.requestFile(peer.id)"
+        (click)="requestFile(peer.id, roomData.socketsData[peer.id].file.name || '')"
+        (keyup.enter)="requestFile(peer.id, roomData.socketsData[peer.id].file.name || '')"
         tabindex="0"
       >
         <div class="float-avatar">
