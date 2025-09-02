@@ -12,11 +12,11 @@
         "platform": "node",
         "outputPath": "dist/apps/svotao-share-api",
         "format": ["cjs"],
-        "bundle": true,
+        "bundle": false,
         "main": "apps/svotao-share-api/src/main.ts",
         "tsConfig": "apps/svotao-share-api/tsconfig.app.json",
         "assets": ["apps/svotao-share-api/src/assets"],
-        "generatePackageJson": false,
+        "generatePackageJson": true,
         "esbuildOptions": {
           "sourcemap": true,
           "outExtension": {
@@ -27,6 +27,8 @@
       "configurations": {
         "development": {},
         "production": {
+          "bundle": true,
+          "generatePackageJson": false,
           "esbuildOptions": {
             "sourcemap": false,
             "outExtension": {

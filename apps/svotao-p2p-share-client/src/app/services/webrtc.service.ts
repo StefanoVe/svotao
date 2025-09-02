@@ -1,4 +1,3 @@
-import { isPlatformBrowser } from '@angular/common';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { Subject } from 'rxjs';
 
@@ -7,34 +6,15 @@ export class WebRTCService {
   private _platformId = inject(PLATFORM_ID);
   peer!: RTCPeerConnection;
   channel: RTCDataChannel | null = null;
-  targetUser: string | null = null;
-  fileToSend: File | null = null;
+  handshake: {
+    to: string | null;
+    from: string | null;
+    direction: 'inbound' | 'outbound';
+    status?: 'offering' | 'answered';
+  } | null = null;
+  publishedFile: File | null = null;
+
   public iceCandidates$ = new Subject<RTCIceCandidateInit>();
-
-  constructor() {
-    if (!isPlatformBrowser(this._platformId)) {
-      return;
-    }
-    this.peer = new RTCPeerConnection();
-    // inoltra candidati locali
-    this.peer.onicecandidate = (ev) => {
-      console.log('New ICE candidate:', ev.candidate);
-      if (ev.candidate) {
-        this.iceCandidates$.next(ev.candidate.toJSON());
-      }
-    };
-
-    // ricezione datachannel (quando l'altro peer crea il channel)
-    this.peer.ondatachannel = (ev) => {
-      console.log('DataChannel received:', ev.channel.label);
-      this.channel = ev.channel;
-      this._setupChannelHandlers();
-    };
-
-    this.peer.addEventListener('connectionstatechange', () => {
-      console.log('WebRTC connection state:', this.peer.connectionState);
-    });
-  }
 
   createDataChannel(config: {
     sourceUser: string;
@@ -42,7 +22,7 @@ export class WebRTCService {
     fileName: string;
     room: string;
   }) {
-    this.targetUser = config.targetUser;
+    console.log('Creating DataChannel for file:', config.fileName);
 
     this.channel = this.peer.createDataChannel(
       this.constructDataChannelName(
@@ -66,18 +46,22 @@ export class WebRTCService {
 
   async receiveAnswer(answer: RTCSessionDescriptionInit) {
     await this.peer.setRemoteDescription(new RTCSessionDescription(answer));
+    if (!this.handshake) {
+      return;
+    }
+    this.handshake.status = 'answered';
   }
 
   async createOffer() {
     const offer = await this.peer.createOffer();
     await this.peer.setLocalDescription(offer);
-    return offer;
-  }
 
-  async createAnswer() {
-    const answer = await this.peer.createAnswer();
-    await this.peer.setLocalDescription(answer);
-    return answer;
+    if (!this.handshake) {
+      return offer;
+    }
+
+    this.handshake.status = 'offering';
+    return offer;
   }
 
   async setRemoteDescription(desc: RTCSessionDescriptionInit) {
@@ -95,8 +79,10 @@ export class WebRTCService {
   // chiamare SOLO dopo channel.onopen
   public async sendFile(file: File, chunkSize = 64 * 1024) {
     if (!this.channel || this.channel.readyState !== 'open') {
-      throw new Error('DataChannel non aperto');
+      throw new Error('DataChannel is not open');
     }
+
+    console.log('Starting file send:', file.name, 'size:', file.size);
 
     // invia metadati
     this.channel.send(
@@ -114,7 +100,9 @@ export class WebRTCService {
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        break;
+      }
       // value è Uint8Array
       // spezzalo in pezzi di chunkSize se necessario
       let offset = 0;
@@ -134,6 +122,10 @@ export class WebRTCService {
 
     // fine
     this.channel.send(JSON.stringify({ type: 'end' }));
+    this.handshake = null;
+    this.channel = null;
+    // this.peer.close();
+
     console.log('file sent');
   }
 
@@ -144,6 +136,36 @@ export class WebRTCService {
     room: string,
   ): string {
     return `data-channel:${room}|${sourceUser}-${targetUser}|${fileName}`;
+  }
+
+  public openPeerConnection() {
+    this.peer = new RTCPeerConnection();
+
+    // inoltra candidati locali
+    this.peer.onicecandidate = (ev) => {
+      if (
+        !ev.candidate ||
+        (this.handshake?.status !== 'answered' &&
+          this.handshake?.direction === 'outbound')
+      ) {
+        return;
+      }
+
+      console.log('New ICE candidate:', ev.candidate);
+
+      this.iceCandidates$.next(ev.candidate.toJSON());
+    };
+
+    // ricezione datachannel (quando l'altro peer crea il channel)
+    this.peer.ondatachannel = (ev) => {
+      console.log('DataChannel received:', ev.channel.label);
+      this.channel = ev.channel;
+      this._setupChannelHandlers();
+    };
+
+    this.peer.addEventListener('connectionstatechange', () => {
+      console.log('WebRTC connection state:', this.peer.connectionState);
+    });
   }
 
   private _setupChannelHandlers() {
@@ -158,12 +180,13 @@ export class WebRTCService {
       null;
 
     this.channel.onopen = () => {
-      if (!this.fileToSend) {
-        console.error(`No file to send`);
+      console.log('DataChannel open', this.publishedFile);
+      if (!this.publishedFile) {
         return;
       }
-      this.sendFile(this.fileToSend, 64 * 1024);
+      this.sendFile(this.publishedFile, 64 * 1024);
     };
+
     this.channel.onmessage = (ev) => {
       const data = ev.data;
       if (typeof data === 'string') {

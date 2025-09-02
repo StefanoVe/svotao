@@ -105,7 +105,7 @@ export class App implements AfterViewInit {
 
   public publishFile(event: (typeof this)['file']) {
     this.file = event;
-    this._webrtc.fileToSend = this.file.file;
+    this._webrtc.publishedFile = this.file.file;
     this.socketio.publishFileData(this.file.file);
   }
 

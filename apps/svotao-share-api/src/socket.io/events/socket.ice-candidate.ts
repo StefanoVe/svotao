@@ -1,7 +1,7 @@
 import { EnumSocketIOAppEvents } from '@svotao/interfaces';
 import { Server, Socket } from 'socket.io';
 import { ContextualizedFloorManager } from '..';
-export const socketRequestFileEvent = (
+export const socketForwardIceCandidate = (
   io: Server,
   socket: Socket,
   floorManager: ContextualizedFloorManager,

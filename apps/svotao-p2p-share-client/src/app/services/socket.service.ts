@@ -33,14 +33,15 @@ export class SocketService extends SocketConnectionHandlerService {
   override appEvents(): void {
     // inoltra i candidati locali via socket al target impostato in WebRTCService
     this._webrtc.iceCandidates$.subscribe((candidate) => {
-      const to = this._webrtc.targetUser;
-      if (!to) {
-        return;
-      }
-      this.socket.emit(EnumSocketIOAppEvents.RTCIceCandidate, {
-        candidate,
-        to,
-      });
+      const to = this._webrtc.handshake?.to;
+
+      console.log('Forwarding ICE candidate to:', to, candidate);
+      setTimeout(() => {
+        this.socket.emit(EnumSocketIOAppEvents.RTCIceCandidate, {
+          candidate,
+          to,
+        });
+      }, 100);
     });
 
     this.socket.on(
@@ -74,6 +75,7 @@ export class SocketService extends SocketConnectionHandlerService {
         console.log('RTC offer received:', data);
         this.rtcOffers$.next(data);
         const answer = await this._webrtc.receiveOffer(data.offer);
+
         this.socket.emit(EnumSocketIOAppEvents.AcceptFileOffer, {
           answer,
           to: data.from,
@@ -86,13 +88,7 @@ export class SocketService extends SocketConnectionHandlerService {
       async (data: { answer: RTCSessionDescriptionInit; from: string }) => {
         console.log('RTC answer received:', data);
 
-        //TODO fixare web rtc, passsa offer e answer ma la connessione non viene sstabilita
         await this._webrtc.receiveAnswer(data.answer);
-
-        console.log(
-          'connection',
-          this._webrtc.peer.connectionState === 'connected',
-        );
       },
     );
 
@@ -102,7 +98,17 @@ export class SocketService extends SocketConnectionHandlerService {
         target: string;
         file: SocketioRoom['socketData']['file'];
       }) => {
-        console.log(`a peer requested a file from you:`, data);
+        this._webrtc.openPeerConnection();
+        this._webrtc.handshake = {
+          to: data.target,
+          from: this.socketData$.value.userId,
+          direction: 'outbound',
+        };
+        console.log(
+          `a peer requested a file from you:`,
+          this._webrtc.handshake,
+        );
+
         this._webrtc.createDataChannel({
           targetUser: data.target,
           fileName: data.file?.name || '',
@@ -139,6 +145,13 @@ export class SocketService extends SocketConnectionHandlerService {
 
   public requestFile(peerId: string): void {
     console.log('Requesting file from peer:', peerId);
+    this._webrtc.openPeerConnection();
+    this._webrtc.handshake = {
+      to: peerId,
+      from: this.socketData$.value.userId,
+      direction: 'inbound',
+    };
+
     this.socket.emit(EnumSocketIOAppEvents.RequestFile, {
       peer: peerId,
     });
