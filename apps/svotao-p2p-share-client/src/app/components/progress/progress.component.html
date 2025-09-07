@@ -1,6 +1,8 @@
-<div class="text-sm font-bytesized text-white p-8">
+<div
+  class="text-sm font-bytesized text-white p-8 w-96 flex flex-col-reverse lg:flex-col"
+>
   <div class="flex items-center gap-2">
-    <div class="w-10/12 bg-gray-800/29 rounded-full h-2.5">
+    <div class="w-full bg-gray-800/29 rounded-full h-2.5">
       <div
         class="bg-white h-2.5 rounded-full"
         [ngStyle]="{ width: progress.percentage + '%' }"
@@ -31,4 +33,11 @@
     <br />
     Destination: {{ progress.handshake.to }}
   </p>
+
+  <button
+    *ngIf="progress.percentage === 100"
+    class="px-4 py-2 bg-cyan-400 text-white w-full hover:scale-105 hover:brightness-110"
+  >
+    ⓧ close
+  </button>
 </div>

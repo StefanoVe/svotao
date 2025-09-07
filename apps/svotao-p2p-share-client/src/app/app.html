@@ -1,12 +1,12 @@
 <!-- PROGRESS -->
-@if(webrtc.progress$ | async; as progress) {
+@if((webrtc.progress$ | async ); as progress) {
 <svotao-p2p-share-progress
   [progress]="progress"
-  class="fixed top-0 left-0 z-50"
+  class="fixed bottom-0 lg:top-0 left-0 z-50"
 ></svotao-p2p-share-progress>
 }
 
-<div class="p-2 text-white min-h-screen">
+<div class="p-2 text-white min-h-[100dvh]">
   <!-- <h1 class="text-white font-extrabold text-3xl">Svotao P2P file sharing</h1> -->
   @if (socketio.socketData$ | async; as socketData) {
   <div class="flex flex-col p-8 gap-2 gap-y-4 items-center">
@@ -79,10 +79,25 @@
         containerClass=" {{!!file.file?.name?.length ? 'size-40 group-hover/upload:size-[20rem] !pointer-events-auto' : 'h-[10rem]  w-[50vh]'}} smooth  flex justify-center items-center overflow-hidden m-1 z-10 "
       >
         <vecholib-upload
-          [uploadLabel]="'Drag a file here or click/tap to upload.'"
+          [uploadLabel]="'Drag a file here or click/tap to publish it.'"
           (fileChanged)="publishFile($event)"
         ></vecholib-upload>
       </svotao-liquid-glass>
+
+      <svotao-liquid-glass
+        *ngIf="!!file.file?.name?.length"
+        type="host"
+        [selected]="true"
+        class="absolute top-0 right-0 text-white shrink-0 scale-75 opacity-70 group-hover/upload:opacity-100 lg:hidden"
+        containerClass="flex  items-center justify-center shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/upload:!w-24 smooth delay-300"
+        (click)="publishFile({
+            file: null,
+            blob: null
+          })"
+      >
+        ✕
+      </svotao-liquid-glass>
+
       <div
         class="opacity-0 pointer-events-none"
         [ngClass]="!!file.file?.name?.length ? 'size-40 !pointer-events-auto' : 'h-40  w-[50vh]'"

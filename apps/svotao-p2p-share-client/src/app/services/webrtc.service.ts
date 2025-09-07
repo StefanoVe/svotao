@@ -147,10 +147,7 @@ export class WebRTCService {
     this.channel.send(JSON.stringify({ type: 'end' }));
     this.handshake = null;
     this.channel = null;
-
-    setTimeout(() => {
-      this.progress$.next(null);
-    }, 10000);
+    this._resetProgress();
 
     console.log('file sent');
   }
@@ -271,9 +268,16 @@ export class WebRTCService {
           },
         });
         console.log('receive progress', progress);
+        this._resetProgress();
       }
     };
     this.channel.onclose = () => console.log('DataChannel closed');
     this.channel.onerror = (err) => console.error('DataChannel error', err);
+  }
+
+  private _resetProgress() {
+    setTimeout(() => {
+      this.progress$.next(null);
+    }, 5000);
   }
 }

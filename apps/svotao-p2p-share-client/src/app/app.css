@@ -26,9 +26,10 @@
 
 .ciclegraph {
   position: relative;
-  width: 500px;
-  height: 500px;
+
   margin: calc(100px / 2 + 0px);
+
+  @apply w-[20rem] h-[20rem] md:w-[500px] md:h-[500px] lg:w-[700px] lg:h-[700px];
 }
 
 .ciclegraph:before {
