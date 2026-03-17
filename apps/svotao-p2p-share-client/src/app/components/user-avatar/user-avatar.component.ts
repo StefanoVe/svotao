@@ -47,6 +47,10 @@ export class UserAvatarComponent implements OnInit, OnChanges {
   public showUsersCards = false;
 
   public tailwindSize = '';
+  public avatarSrc = '';
+  public avatarFailed = false;
+  private _avatarFallbackTried = false;
+  private _avatarFormat: 'png' | 'svg' = 'png';
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) {
@@ -54,6 +58,9 @@ export class UserAvatarComponent implements OnInit, OnChanges {
     }
 
     this._updateTailwindSize();
+    this._avatarFallbackTried = false;
+    this._avatarFormat = 'png';
+    this._setAvatarSrc(this._avatarFormat);
   }
 
   ngOnChanges(): void {
@@ -61,9 +68,39 @@ export class UserAvatarComponent implements OnInit, OnChanges {
       return;
     }
     this._updateTailwindSize();
+    this._avatarFallbackTried = false;
+    this._avatarFormat = 'png';
+    this._setAvatarSrc(this._avatarFormat);
   }
 
   private _updateTailwindSize(): void {
     this.tailwindSize = `size-${this.size}`;
+  }
+
+  private _setAvatarSrc(format: 'png' | 'svg'): void {
+    const seed = encodeURIComponent(this.user || 'guest');
+    this.avatarSrc = `https://api.dicebear.com/9.x/big-smile/${format}?seed=${seed}`;
+    this.avatarFailed = false;
+  }
+
+  public onAvatarError(): void {
+    console.warn('Avatar load failed', {
+      user: this.user,
+      src: this.avatarSrc,
+      attemptedFallback: this._avatarFallbackTried,
+    });
+
+    if (!this._avatarFallbackTried) {
+      this._avatarFallbackTried = true;
+      this._avatarFormat = this._avatarFormat === 'png' ? 'svg' : 'png';
+      this._setAvatarSrc(this._avatarFormat);
+      return;
+    }
+
+    this.avatarFailed = true;
+  }
+
+  public get avatarInitials(): string {
+    return (this.user || '?').trim().slice(0, 2).toUpperCase();
   }
 }

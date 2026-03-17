@@ -10,10 +10,19 @@
     [title]="user"
   >
     <img
-      src="https://api.dicebear.com/9.x/big-smile/svg?seed={{ user }}"
+      *ngIf="!avatarFailed; else avatarFallback"
+      [src]="avatarSrc"
       class="size-full p-1 rounded-full"
-      alt="{{ user }} avatar "
+      [alt]="user + ' avatar'"
+      (error)="onAvatarError()"
     />
+    <ng-template #avatarFallback>
+      <div
+        class="size-full p-1 rounded-full flex items-center justify-center text-white font-bold"
+      >
+        {{ avatarInitials }}
+      </div>
+    </ng-template>
   </svotao-liquid-glass>
 
   <div class="ml-3" *ngIf="showName">
