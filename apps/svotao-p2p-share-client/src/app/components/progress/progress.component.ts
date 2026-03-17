@@ -14,6 +14,8 @@ export class ProgressComponent implements OnChanges {
   private _startAtMs = 0;
   public speedBytesPerSec = 0;
 
+  public forceHide = false;
+
   ngOnChanges(): void {
     if (!this.progress) {
       return;
