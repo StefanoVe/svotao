@@ -26,6 +26,8 @@ export class WebRTCService {
   publishedFile: File | null = null;
   private _queuedLocalCandidates: RTCIceCandidateInit[] = [];
   private _queuedRemoteCandidates: RTCIceCandidateInit[] = [];
+  private _progressResetTimeoutId: ReturnType<typeof setTimeout> | null = null;
+  private _lastKnownHandshake: IWebRTCHandshake | null = null;
 
   public iceCandidates$ = new Subject<RTCIceCandidateInit>();
   public progress$ = new BehaviorSubject<IWebRTCProgress | null>(null);
@@ -132,41 +134,48 @@ export class WebRTCService {
       }),
     );
 
-    const stream = file.stream();
-    const reader = stream.getReader();
     let sent = 0;
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) {
-        break;
-      }
-      // value è Uint8Array
-      // spezzalo in pezzi di chunkSize se necessario
-      let offset = 0;
-      while (offset < value.byteLength) {
-        const slice = value.slice(offset, offset + chunkSize);
-        // backpressure
-        while (this.channel.bufferedAmount > 512 * 1024) {
-          await this._sleep(50);
-        }
-        this.channel.send(slice);
-        sent += slice.byteLength;
-        offset += chunkSize;
+    while (sent < file.size) {
+      const chunkEnd = Math.min(sent + chunkSize, file.size);
+      let chunk: ArrayBuffer;
 
-        const progress = (sent / file.size) * 100;
-
-        this.progress$.next({
-          handshake: <IWebRTCHandshake>this.handshake,
-          percentage: progress,
-          file: {
-            name: this.publishedFile?.name || '',
-            size: this.publishedFile?.size || 0,
-            mime: this.publishedFile?.type || '',
-          },
+      try {
+        chunk = await file.slice(sent, chunkEnd).arrayBuffer();
+      } catch (error) {
+        console.error('Unable to read local file chunk while sending:', {
+          fileName: file.name,
+          offset: sent,
+          chunkEnd,
+          error,
         });
-        console.log('send progress', progress);
+        throw error;
       }
+
+      // backpressure
+      while (this.channel.bufferedAmount > 512 * 1024) {
+        await this._sleep(50);
+      }
+
+      if (!this.channel || this.channel.readyState !== 'open') {
+        throw new Error('DataChannel closed while sending file');
+      }
+
+      this.channel.send(chunk);
+      sent = chunkEnd;
+
+      const progress = (sent / file.size) * 100;
+
+      this._setProgress({
+        handshake: this._resolveProgressHandshake(),
+        percentage: progress,
+        file: {
+          name: this.publishedFile?.name || '',
+          size: this.publishedFile?.size || 0,
+          mime: this.publishedFile?.type || '',
+        },
+      });
+      console.log('send progress', progress);
     }
 
     // fine
@@ -244,7 +253,9 @@ export class WebRTCService {
       if (!this.publishedFile) {
         return;
       }
-      this.sendFile(this.publishedFile, 64 * 1024);
+      this.sendFile(this.publishedFile, 64 * 1024).catch((error) => {
+        console.error('Failed to send file via DataChannel:', error);
+      });
     };
 
     this.channel.onmessage = (ev) => {
@@ -277,6 +288,7 @@ export class WebRTCService {
             a.download = currentMeta?.name || 'download';
             a.click();
             URL.revokeObjectURL(url);
+            this._resetProgress();
             currentMeta = null;
             chunks.length = 0;
           }
@@ -295,8 +307,8 @@ export class WebRTCService {
 
         const progress = (received / (expectedSize || 1)) * 100;
 
-        this.progress$.next({
-          handshake: <IWebRTCHandshake>this.handshake,
+        this._setProgress({
+          handshake: this._resolveProgressHandshake(),
           percentage: progress,
           file: {
             name: currentMeta?.name || '',
@@ -305,7 +317,6 @@ export class WebRTCService {
           },
         });
         console.log('receive progress', progress);
-        this._resetProgress();
       }
     };
     this.channel.onclose = () => console.log('DataChannel closed');
@@ -313,9 +324,42 @@ export class WebRTCService {
   }
 
   private _resetProgress() {
-    setTimeout(() => {
+    this._clearProgressResetTimeout();
+    this._progressResetTimeoutId = setTimeout(() => {
       this.progress$.next(null);
+      this._progressResetTimeoutId = null;
     }, 5000);
+  }
+
+  private _clearProgressResetTimeout() {
+    if (!this._progressResetTimeoutId) {
+      return;
+    }
+
+    clearTimeout(this._progressResetTimeoutId);
+    this._progressResetTimeoutId = null;
+  }
+
+  private _setProgress(progress: IWebRTCProgress) {
+    this._clearProgressResetTimeout();
+    this.progress$.next(progress);
+  }
+
+  private _resolveProgressHandshake(): IWebRTCHandshake {
+    if (this.handshake) {
+      this._lastKnownHandshake = { ...this.handshake };
+      return this._lastKnownHandshake;
+    }
+
+    if (this._lastKnownHandshake) {
+      return this._lastKnownHandshake;
+    }
+
+    return {
+      to: null,
+      from: null,
+      direction: 'inbound',
+    };
   }
 
   private _flushQueuedLocalCandidates() {

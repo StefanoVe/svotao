@@ -78,10 +78,61 @@
         [selected]="!!file.file?.name?.length"
         containerClass=" {{!!file.file?.name?.length ? 'size-40 group-hover/upload:size-[20rem] !pointer-events-auto' : 'h-[10rem]  w-[50vh]'}} smooth  flex justify-center items-center overflow-hidden m-1 z-10 "
       >
-        <vecholib-upload
-          [uploadLabel]="'Drag a file here or click/tap to publish it.'"
-          (fileChanged)="publishFile($event)"
-        ></vecholib-upload>
+        <input
+          #nativeFileInput
+          type="file"
+          class="hidden"
+          (change)="onNativeFileSelected($event)"
+        />
+        <button
+          type="button"
+          class="w-full h-full flex flex-col gap-3 justify-center items-center px-4 text-gray-50"
+          (click)="nativeFileInput.click()"
+          (dragover)="onFileDragOver($event)"
+          (drop)="onFileDrop($event)"
+        >
+          @if (file.file; as selectedFile) {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="size-12"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+            />
+          </svg>
+
+          <span class="text-sm text-center truncate max-w-full"
+            >{{ selectedFile.name }}</span
+          >
+          <span class="text-xs opacity-80"
+            >{{ selectedFile.size | filesize: 'mb' }} • click to replace</span
+          >
+          } @else {
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1"
+            stroke="currentColor"
+            class="w-12 h-12"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9 8.25H7.5a2.25 2.25 0 00-2.25 2.25v9a2.25 2.25 0 002.25 2.25h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25H15m0-3l-3-3m0 0l-3 3m3-3V15"
+            />
+          </svg>
+          <span class="text-sm text-center"
+            >Drag a file here or click/tap to publish it.</span
+          >
+          }
+        </button>
       </svotao-liquid-glass>
 
       <svotao-liquid-glass

@@ -11,10 +11,7 @@ import {
 import { Router, RouterModule } from '@angular/router';
 
 import { map, tap } from 'rxjs';
-import {
-  LiquidGlassContainer,
-  UploadComponent,
-} from 'vecholib/angular/components';
+import { LiquidGlassContainer } from 'vecholib/angular/components';
 import { TailwindFormsModule, ToastrService } from 'vecholib/angular/modules';
 import { environment } from '../environments/environment';
 import { ProgressComponent } from './components/progress/progress.component';
@@ -27,7 +24,6 @@ import { WebRTCService } from './services/webrtc.service';
     RouterModule,
     LiquidGlassContainer,
     TailwindFormsModule,
-    UploadComponent,
     AsyncPipe,
     CommonModule,
     UserAvatarComponent,
@@ -109,6 +105,36 @@ export class App implements AfterViewInit {
     this.file = event;
     this.webrtc.publishedFile = this.file.file;
     this.socketio.publishFileData(this.file.file);
+  }
+
+  public onNativeFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] || null;
+    if (!file) {
+      return;
+    }
+    this.publishFile({
+      file,
+      blob: null,
+    });
+    // Permette di riselezionare lo stesso file al tentativo successivo.
+    input.value = '';
+  }
+
+  public onFileDragOver(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  public onFileDrop(event: DragEvent): void {
+    event.preventDefault();
+    const file = event.dataTransfer?.files?.[0] || null;
+    if (!file) {
+      return;
+    }
+    this.publishFile({
+      file,
+      blob: null,
+    });
   }
 
   public requestFile(peer: string, fileName: string) {
