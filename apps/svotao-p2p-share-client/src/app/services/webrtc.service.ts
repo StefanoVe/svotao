@@ -112,17 +112,18 @@ export class WebRTCService {
     }
   }
 
-  private async _sleep(ms: number) {
-    return new Promise((r) => setTimeout(r, ms));
-  }
-
   // chiamare SOLO dopo channel.onopen
-  public async sendFile(file: File, chunkSize = 64 * 1024) {
+  public async sendFile(file: File, chunkSize = 256 * 1024) {
     if (!this.channel || this.channel.readyState !== 'open') {
       throw new Error('DataChannel is not open');
     }
 
     console.log('Starting file send:', file.name, 'size:', file.size);
+
+    const highWaterMarkBytes = 8 * 1024 * 1024;
+    const lowWaterMarkBytes = 2 * 1024 * 1024;
+    const progressIntervalMs = 150;
+    this.channel.bufferedAmountLowThreshold = lowWaterMarkBytes;
 
     // invia metadati
     this.channel.send(
@@ -135,8 +136,11 @@ export class WebRTCService {
     );
 
     let sent = 0;
+    let lastProgressUpdateMs = 0;
 
     while (sent < file.size) {
+      await this._waitForBufferedAmountLow(this.channel, highWaterMarkBytes);
+
       const chunkEnd = Math.min(sent + chunkSize, file.size);
       let chunk: ArrayBuffer;
 
@@ -152,11 +156,6 @@ export class WebRTCService {
         throw error;
       }
 
-      // backpressure
-      while (this.channel.bufferedAmount > 512 * 1024) {
-        await this._sleep(50);
-      }
-
       if (!this.channel || this.channel.readyState !== 'open') {
         throw new Error('DataChannel closed while sending file');
       }
@@ -164,18 +163,20 @@ export class WebRTCService {
       this.channel.send(chunk);
       sent = chunkEnd;
 
+      const now = performance.now();
       const progress = (sent / file.size) * 100;
-
-      this._setProgress({
-        handshake: this._resolveProgressHandshake(),
-        percentage: progress,
-        file: {
-          name: this.publishedFile?.name || '',
-          size: this.publishedFile?.size || 0,
-          mime: this.publishedFile?.type || '',
-        },
-      });
-      console.log('send progress', progress);
+      if (progress >= 100 || now - lastProgressUpdateMs >= progressIntervalMs) {
+        this._setProgress({
+          handshake: this._resolveProgressHandshake(),
+          percentage: progress,
+          file: {
+            name: this.publishedFile?.name || '',
+            size: this.publishedFile?.size || 0,
+            mime: this.publishedFile?.type || '',
+          },
+        });
+        lastProgressUpdateMs = now;
+      }
     }
 
     // fine
@@ -253,7 +254,7 @@ export class WebRTCService {
       if (!this.publishedFile) {
         return;
       }
-      this.sendFile(this.publishedFile, 64 * 1024).catch((error) => {
+      this.sendFile(this.publishedFile).catch((error) => {
         console.error('Failed to send file via DataChannel:', error);
       });
     };
@@ -316,7 +317,6 @@ export class WebRTCService {
             mime: currentMeta?.mime || '',
           },
         });
-        console.log('receive progress', progress);
       }
     };
     this.channel.onclose = () => console.log('DataChannel closed');
@@ -343,6 +343,43 @@ export class WebRTCService {
   private _setProgress(progress: IWebRTCProgress) {
     this._clearProgressResetTimeout();
     this.progress$.next(progress);
+  }
+
+  private async _waitForBufferedAmountLow(
+    channel: RTCDataChannel,
+    highWaterMarkBytes: number,
+  ) {
+    if (channel.bufferedAmount <= highWaterMarkBytes) {
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const onBufferedAmountLow = () => {
+        cleanup();
+        resolve();
+      };
+
+      const onChannelClosed = () => {
+        cleanup();
+        reject(new Error('DataChannel closed while waiting for buffer drain'));
+      };
+
+      const cleanup = () => {
+        channel.removeEventListener('bufferedamountlow', onBufferedAmountLow);
+        channel.removeEventListener('close', onChannelClosed);
+        channel.removeEventListener('error', onChannelClosed);
+      };
+
+      channel.addEventListener('bufferedamountlow', onBufferedAmountLow, {
+        once: true,
+      });
+      channel.addEventListener('close', onChannelClosed, {
+        once: true,
+      });
+      channel.addEventListener('error', onChannelClosed, {
+        once: true,
+      });
+    });
   }
 
   private _resolveProgressHandshake(): IWebRTCHandshake {
