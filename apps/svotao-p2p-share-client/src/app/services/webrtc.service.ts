@@ -24,6 +24,8 @@ export class WebRTCService {
   channel: RTCDataChannel | null = null;
   handshake: IWebRTCHandshake | null = null;
   publishedFile: File | null = null;
+  private _queuedLocalCandidates: RTCIceCandidateInit[] = [];
+  private _queuedRemoteCandidates: RTCIceCandidateInit[] = [];
 
   public iceCandidates$ = new Subject<RTCIceCandidateInit>();
   public progress$ = new BehaviorSubject<IWebRTCProgress | null>(null);
@@ -49,6 +51,7 @@ export class WebRTCService {
 
   async receiveOffer(offer: RTCSessionDescriptionInit) {
     await this.peer.setRemoteDescription(new RTCSessionDescription(offer));
+    await this._flushQueuedRemoteCandidates();
     // Ora puoi creare la answer
     const answer = await this.peer.createAnswer();
     await this.peer.setLocalDescription(answer);
@@ -59,9 +62,14 @@ export class WebRTCService {
   async receiveAnswer(answer: RTCSessionDescriptionInit) {
     await this.peer.setRemoteDescription(new RTCSessionDescription(answer));
     if (!this.handshake) {
+      await this._flushQueuedRemoteCandidates();
+      this._flushQueuedLocalCandidates();
       return;
     }
+
     this.handshake.status = 'answered';
+    await this._flushQueuedRemoteCandidates();
+    this._flushQueuedLocalCandidates();
   }
 
   async createOffer() {
@@ -78,10 +86,28 @@ export class WebRTCService {
 
   async setRemoteDescription(desc: RTCSessionDescriptionInit) {
     await this.peer.setRemoteDescription(desc);
+    await this._flushQueuedRemoteCandidates();
   }
 
   async addIceCandidate(candidate: RTCIceCandidateInit) {
-    await this.peer.addIceCandidate(candidate);
+    if (!this.peer.remoteDescription) {
+      this._queuedRemoteCandidates.push(candidate);
+      console.log(
+        'Remote description not ready, queueing ICE candidate:',
+        candidate,
+      );
+      return;
+    }
+
+    try {
+      await this.peer.addIceCandidate(candidate);
+    } catch (error) {
+      console.warn(
+        'Failed to add ICE candidate immediately, queueing for retry:',
+        error,
+      );
+      this._queuedRemoteCandidates.push(candidate);
+    }
   }
 
   private async _sleep(ms: number) {
@@ -162,21 +188,32 @@ export class WebRTCService {
   }
 
   public openPeerConnection() {
-    this.peer = new RTCPeerConnection();
+    this._queuedLocalCandidates = [];
+    this._queuedRemoteCandidates = [];
+    this.peer = new RTCPeerConnection({
+      // STUN pubblico di fallback per connettività cross-network.
+      iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }],
+    });
 
     // inoltra candidati locali
     this.peer.onicecandidate = (ev) => {
+      if (!ev.candidate) {
+        return;
+      }
+
+      const candidate = ev.candidate.toJSON();
       if (
-        !ev.candidate ||
-        (this.handshake?.status !== 'answered' &&
-          this.handshake?.direction === 'outbound')
+        this.handshake?.direction === 'outbound' &&
+        this.handshake?.status !== 'answered'
       ) {
+        this._queuedLocalCandidates.push(candidate);
+        console.log('Queueing local ICE candidate until answer is received');
         return;
       }
 
       console.log('New ICE candidate:', ev.candidate);
 
-      this.iceCandidates$.next(ev.candidate.toJSON());
+      this.iceCandidates$.next(candidate);
     };
 
     // ricezione datachannel (quando l'altro peer crea il channel)
@@ -279,5 +316,39 @@ export class WebRTCService {
     setTimeout(() => {
       this.progress$.next(null);
     }, 5000);
+  }
+
+  private _flushQueuedLocalCandidates() {
+    if (!this._queuedLocalCandidates.length) {
+      return;
+    }
+
+    for (const candidate of this._queuedLocalCandidates) {
+      this.iceCandidates$.next(candidate);
+    }
+
+    console.log('Flushed queued local ICE candidates');
+    this._queuedLocalCandidates = [];
+  }
+
+  private async _flushQueuedRemoteCandidates() {
+    if (!this._queuedRemoteCandidates.length || !this.peer.remoteDescription) {
+      return;
+    }
+
+    const pending = [...this._queuedRemoteCandidates];
+    this._queuedRemoteCandidates = [];
+
+    for (const candidate of pending) {
+      try {
+        await this.peer.addIceCandidate(candidate);
+      } catch (error) {
+        console.warn(
+          'Failed to flush queued ICE candidate, keeping in queue:',
+          error,
+        );
+        this._queuedRemoteCandidates.push(candidate);
+      }
+    }
   }
 }

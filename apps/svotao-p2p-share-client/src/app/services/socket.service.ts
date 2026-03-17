@@ -34,6 +34,13 @@ export class SocketService extends SocketConnectionHandlerService {
     // inoltra i candidati locali via socket al target impostato in WebRTCService
     this._webrtc.iceCandidates$.subscribe((candidate) => {
       const to = this._webrtc.handshake?.to;
+      if (!to) {
+        console.warn(
+          'Skipping ICE candidate forwarding because target peer is missing',
+          candidate,
+        );
+        return;
+      }
 
       console.log('Forwarding ICE candidate to:', to, candidate);
       setTimeout(() => {
