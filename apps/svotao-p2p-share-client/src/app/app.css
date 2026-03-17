@@ -20,7 +20,7 @@
 
   margin: calc(100px / 2 + 0px);
 
-  @apply w-[20rem] h-[20rem] md:w-[500px] md:h-[500px] lg:w-[450px] lg:h-[450px];
+  @apply w-[18rem] h-[18rem] md:w-[500px] md:h-[500px] lg:w-[450px] lg:h-[450px];
 }
 
 .ciclegraph:before {

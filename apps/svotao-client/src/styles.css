@@ -1,2 +1,7 @@
 @import 'tailwindcss';
 @config "../tailwind.config.js";
+
+html,
+body {
+  background-color: #0d111a;
+}
