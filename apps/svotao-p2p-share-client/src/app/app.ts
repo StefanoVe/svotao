@@ -54,15 +54,7 @@ export class App implements AfterViewInit {
 
   constructor() {
     afterNextRender(() => {
-      const room = this._getRoomId();
-
-      this.socketio.connect(undefined, {
-        room,
-      });
-
-      this.socketio.socketData$.subscribe((data) => {
-        this._router.navigate(['s', 'rooms', data.room || '']);
-      });
+      this._bootstrap();
     });
   }
 
@@ -92,6 +84,15 @@ export class App implements AfterViewInit {
         }),
       )
       .subscribe();
+  }
+
+  public changeRoom() {
+    const roomName = prompt('Room name:');
+    this._router.navigate(['s', 'rooms', roomName]);
+    this.socketio.disconnect();
+    setTimeout(() => {
+      this._bootstrap();
+    }, 1);
   }
 
   public copyRoomUrl(url: string): void {
@@ -152,5 +153,17 @@ export class App implements AfterViewInit {
     console.log(`Room ID: ${roomId}`);
 
     return roomId === 'new' ? undefined : roomId;
+  }
+
+  private _bootstrap() {
+    const room = this._getRoomId();
+
+    this.socketio.connect(undefined, {
+      room,
+    });
+
+    this.socketio.socketData$.subscribe((data) => {
+      this._router.navigate(['s', 'rooms', data.room || '']);
+    });
   }
 }
