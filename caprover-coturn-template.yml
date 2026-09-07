@@ -1,0 +1,56 @@
+captainVersion: 4
+
+services:
+  svotao-turn:
+    image: coturn/coturn:4.6.3
+    restart: always
+    caproverExtra:
+      notExposeAsWebApp: 'true'
+    ports:
+      - 3478:3478
+      - 49160-49170:49160-49170
+    command:
+      - turnserver
+      - -n
+      - --log-file=stdout
+      - --external-ip=$$cap_public_ip
+      - --realm=$$cap_turn_realm
+      - --server-name=$$cap_turn_realm
+      - --listening-port=3478
+      - --min-port=49160
+      - --max-port=49170
+      - --fingerprint
+      - --lt-cred-mech
+      - --user=$$cap_turn_username:$$cap_turn_password
+      - --no-cli
+      - --no-multicast-peers
+
+caproverOneClickApp:
+  displayName: Svotao TURN Server
+  description: TURN/STUN relay server for WebRTC connections across different NATs.
+  documentation: Configure the same TURN values on svotao-share-api using TURN_URLS, TURN_USERNAME, and TURN_CREDENTIAL.
+  isOfficial: false
+  variables:
+    - id: '$$cap_public_ip'
+      label: Public VPS IP
+      description: Public IPv4 address of the VPS where this app runs.
+    - id: '$$cap_turn_realm'
+      label: TURN Realm
+      defaultValue: p2p-api.vps.notifyapp.it
+      description: Domain or hostname used as the TURN realm.
+    - id: '$$cap_turn_username'
+      label: TURN Username
+      defaultValue: svotao
+      description: Username that WebRTC clients will use.
+    - id: '$$cap_turn_password'
+      label: TURN Password
+      description: Use a long random password. This must match TURN_CREDENTIAL in svotao-share-api.
+  instructions:
+    start: >-
+      Deploy this as a One-Click App, then open TCP and UDP 3478 plus
+      TCP and UDP 49160-49170 on your VPS firewall/provider.
+    end: >-
+      Set these environment variables on svotao-share-api:
+      TURN_URLS=turn:YOUR_TURN_HOST:3478?transport=tcp,
+      TURN_USERNAME=<TURN Username>,
+      TURN_CREDENTIAL=<TURN Password>.

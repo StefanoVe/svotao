@@ -21,3 +21,14 @@ export interface SocketioRoom {
     };
   };
 }
+
+export interface WebRTCIceServerConfig {
+  urls: string | string[];
+  username?: string;
+  credential?: string;
+}
+
+export interface WebRTCConfig {
+  iceServers: WebRTCIceServerConfig[];
+  iceTransportPolicy?: RTCIceTransportPolicy;
+}

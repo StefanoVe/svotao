@@ -161,6 +161,7 @@ export class App implements AfterViewInit {
     this.socketio.connect(undefined, {
       room,
     });
+    void this.webrtc.preloadRTCConfiguration();
 
     this.socketio.socketData$.subscribe((data) => {
       this._router.navigate(['s', 'rooms', data.room || '']);

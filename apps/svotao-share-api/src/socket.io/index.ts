@@ -14,6 +14,7 @@ export const socketIoAppEvents = (
   socket: Socket,
   floorManager: bootstraps.SocketioFloorManager,
 ) => {
+  normalizeSocketHandshakeHeaders(socket);
   lm.log(`Socket connected with id ${socket.id}`, 'success');
 
   SOCKETIO_EVENTS.forEach((callback) => callback(io, socket, floorManager));
@@ -57,4 +58,25 @@ export const socketIoAppEvents = (
     ...roomData,
     sockets: roomData.sockets,
   });
+};
+
+const normalizeSocketHandshakeHeaders = (socket: Socket) => {
+  const headerValue = (key: string): string | undefined => {
+    const authValue = socket.handshake.auth?.[key];
+    const queryValue = socket.handshake.query?.[key];
+    const value = authValue || queryValue;
+
+    if (Array.isArray(value)) {
+      return value[0];
+    }
+
+    return typeof value === 'string' ? value : undefined;
+  };
+
+  socket.handshake.headers.user =
+    socket.handshake.headers.user || headerValue('user') || '{}';
+  socket.handshake.headers.agent =
+    socket.handshake.headers.agent || headerValue('agent') || '{}';
+  socket.handshake.headers.id =
+    socket.handshake.headers.id || headerValue('id') || '';
 };

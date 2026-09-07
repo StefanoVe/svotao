@@ -1,8 +1,16 @@
 import { inject, Injectable } from '@angular/core';
 import { EnumSocketIOAppEvents, SocketioRoom } from '@svotao/interfaces';
-import { BehaviorSubject, ReplaySubject, Subject, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  ReplaySubject,
+  Subject,
+  Subscription,
+  tap,
+} from 'rxjs';
+import { io } from 'socket.io-client';
 import { SocketConnectionHandlerService } from 'vecholib/angular/services';
 import { IFloorManagerRoom } from 'vecholib/interfaces';
+import { environment } from '../../environments/environment';
 import { WebRTCService } from './webrtc.service';
 export interface ISocketReadyData {
   room: string;
@@ -15,6 +23,7 @@ export interface ISocketReadyData {
 })
 export class SocketService extends SocketConnectionHandlerService {
   private _webrtc = inject(WebRTCService);
+  private _iceCandidateSubscription: Subscription | null = null;
 
   public socketData$ = new BehaviorSubject<ISocketReadyData>(
     <ISocketReadyData>{},
@@ -30,26 +39,70 @@ export class SocketService extends SocketConnectionHandlerService {
     from: string;
   }>();
 
+  override connect<T>(userId?: string, headers?: T): void {
+    console.log('Connecting to socket server');
+    const agent = this._buildAgent(userId);
+    const user = JSON.stringify(headers || {});
+    const agentJson = JSON.stringify(agent);
+
+    this.agent = agent;
+    this.socket = io(environment.apiUrl, {
+      secure: environment.apiUrl.startsWith('https://'),
+      transports: ['polling', 'websocket'],
+      auth: {
+        user,
+        agent: agentJson,
+        id: agent.id,
+      },
+      query: {
+        user,
+        agent: agentJson,
+        id: agent.id,
+      },
+    });
+
+    this.socket.connect();
+
+    this.socket.on('connect', () => {
+      console.log('Connected to socket server');
+      this.connection$.next({
+        active: true,
+        user: this.agent,
+      });
+    });
+
+    this.socket.on('disconnect', () => {
+      this.connection$.next({
+        active: false,
+      });
+    });
+
+    this.appEvents();
+  }
+
   override appEvents(): void {
     // inoltra i candidati locali via socket al target impostato in WebRTCService
-    this._webrtc.iceCandidates$.subscribe((candidate) => {
-      const to = this._webrtc.handshake?.to;
-      if (!to) {
-        console.warn(
-          'Skipping ICE candidate forwarding because target peer is missing',
-          candidate,
-        );
-        return;
-      }
+    this._iceCandidateSubscription?.unsubscribe();
+    this._iceCandidateSubscription = this._webrtc.iceCandidates$.subscribe(
+      (candidate) => {
+        const to = this._webrtc.handshake?.to;
+        if (!to) {
+          console.warn(
+            'Skipping ICE candidate forwarding because target peer is missing',
+            candidate,
+          );
+          return;
+        }
 
-      console.log('Forwarding ICE candidate to:', to, candidate);
-      setTimeout(() => {
-        this.socket.emit(EnumSocketIOAppEvents.RTCIceCandidate, {
-          candidate,
-          to,
-        });
-      }, 100);
-    });
+        console.log('Forwarding ICE candidate to:', to, candidate);
+        setTimeout(() => {
+          this.socket.emit(EnumSocketIOAppEvents.RTCIceCandidate, {
+            candidate,
+            to,
+          });
+        }, 100);
+      },
+    );
 
     this.socket.on(
       EnumSocketIOAppEvents.SocketReady,
@@ -105,7 +158,7 @@ export class SocketService extends SocketConnectionHandlerService {
         target: string;
         file: SocketioRoom['socketData']['file'];
       }) => {
-        this._webrtc.openPeerConnection();
+        await this._webrtc.openPeerConnection();
         this._webrtc.handshake = {
           to: data.target,
           from: this.socketData$.value.userId,
@@ -150,9 +203,9 @@ export class SocketService extends SocketConnectionHandlerService {
     });
   }
 
-  public requestFile(peerId: string): void {
+  public async requestFile(peerId: string): Promise<void> {
     console.log('Requesting file from peer:', peerId);
-    this._webrtc.openPeerConnection();
+    await this._webrtc.openPeerConnection();
     this._webrtc.handshake = {
       to: peerId,
       from: this.socketData$.value.userId,
@@ -162,5 +215,17 @@ export class SocketService extends SocketConnectionHandlerService {
     this.socket.emit(EnumSocketIOAppEvents.RequestFile, {
       peer: peerId,
     });
+  }
+
+  private _buildAgent(userId?: string) {
+    return {
+      browser: navigator.userAgent,
+      device: navigator.platform || 'browser',
+      deviceType: /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)
+        ? 'mobile'
+        : 'desktop',
+      connectionTimestamp: Date.now(),
+      id: userId || crypto.randomUUID(),
+    };
   }
 }

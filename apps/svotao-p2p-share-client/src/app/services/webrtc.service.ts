@@ -1,5 +1,8 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable } from '@angular/core';
+import type { WebRTCConfig } from '@svotao/interfaces';
+import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 interface IWebRTCHandshake {
   to: string | null;
@@ -20,10 +23,12 @@ export interface IWebRTCProgress {
 
 @Injectable({ providedIn: 'root' })
 export class WebRTCService {
+  private _http = inject(HttpClient);
   peer!: RTCPeerConnection;
   channel: RTCDataChannel | null = null;
   handshake: IWebRTCHandshake | null = null;
   publishedFile: File | null = null;
+  private _rtcConfig: RTCConfiguration | null = null;
   private _queuedLocalCandidates: RTCIceCandidateInit[] = [];
   private _queuedRemoteCandidates: RTCIceCandidateInit[] = [];
   private _progressResetTimeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -31,6 +36,10 @@ export class WebRTCService {
 
   public iceCandidates$ = new Subject<RTCIceCandidateInit>();
   public progress$ = new BehaviorSubject<IWebRTCProgress | null>(null);
+
+  public async preloadRTCConfiguration(): Promise<void> {
+    await this._getRTCConfiguration(false);
+  }
 
   createDataChannel(config: {
     sourceUser: string;
@@ -197,13 +206,15 @@ export class WebRTCService {
     return `data-channel:${room}|${sourceUser}-${targetUser}|${fileName}`;
   }
 
-  public openPeerConnection() {
+  public async openPeerConnection() {
     this._queuedLocalCandidates = [];
     this._queuedRemoteCandidates = [];
-    this.peer = new RTCPeerConnection({
-      // STUN pubblico di fallback per connettività cross-network.
-      iceServers: [{ urls: ['stun:stun.l.google.com:19302'] }],
-    });
+    const rtcConfiguration = await this._getRTCConfiguration();
+    console.log(
+      'Opening RTCPeerConnection with ICE configuration:',
+      this._sanitizeRTCConfiguration(rtcConfiguration),
+    );
+    this.peer = new RTCPeerConnection(rtcConfiguration);
 
     // inoltra candidati locali
     this.peer.onicecandidate = (ev) => {
@@ -221,7 +232,11 @@ export class WebRTCService {
         return;
       }
 
-      console.log('New ICE candidate:', ev.candidate);
+      console.log(
+        'New ICE candidate:',
+        this._getCandidateType(candidate.candidate),
+        candidate,
+      );
 
       this.iceCandidates$.next(candidate);
     };
@@ -235,6 +250,14 @@ export class WebRTCService {
 
     this.peer.addEventListener('connectionstatechange', () => {
       console.log('WebRTC connection state:', this.peer.connectionState);
+    });
+
+    this.peer.addEventListener('iceconnectionstatechange', () => {
+      console.log('WebRTC ICE connection state:', this.peer.iceConnectionState);
+    });
+
+    this.peer.addEventListener('icegatheringstatechange', () => {
+      console.log('WebRTC ICE gathering state:', this.peer.iceGatheringState);
     });
   }
 
@@ -431,5 +454,62 @@ export class WebRTCService {
         this._queuedRemoteCandidates.push(candidate);
       }
     }
+  }
+
+  private async _getRTCConfiguration(
+    cacheFallback = true,
+  ): Promise<RTCConfiguration> {
+    if (this._rtcConfig) {
+      return this._rtcConfig;
+    }
+
+    const fallbackConfig: RTCConfiguration = {
+      iceServers: [
+        {
+          urls: [
+            'stun:stun.l.google.com:19302',
+            'stun:stun1.l.google.com:19302',
+          ],
+        },
+      ],
+    };
+
+    try {
+      const config = await firstValueFrom(
+        this._http.get<WebRTCConfig>(`${environment.apiUrl}/api/rtc-config`),
+      );
+
+      this._rtcConfig = {
+        iceServers: config.iceServers.length
+          ? config.iceServers
+          : fallbackConfig.iceServers,
+        iceTransportPolicy: config.iceTransportPolicy || 'all',
+      };
+    } catch (error) {
+      console.warn('Unable to load RTC configuration, using fallback:', error);
+      if (cacheFallback) {
+        this._rtcConfig = fallbackConfig;
+      }
+      return fallbackConfig;
+    }
+
+    return this._rtcConfig;
+  }
+
+  private _getCandidateType(candidate?: string): string {
+    return candidate?.match(/ typ ([a-z]+)/)?.[1] || 'unknown';
+  }
+
+  private _sanitizeRTCConfiguration(
+    config: RTCConfiguration,
+  ): RTCConfiguration {
+    return {
+      ...config,
+      iceServers: config.iceServers?.map((server) => ({
+        urls: server.urls,
+        username: server.username ? '<set>' : undefined,
+        credential: server.credential ? '<set>' : undefined,
+      })),
+    };
   }
 }
