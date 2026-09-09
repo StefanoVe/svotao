@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, output } from '@angular/core';
 import { IWebRTCProgress } from '../../services/webrtc.service';
 
 @Component({
@@ -9,6 +9,7 @@ import { IWebRTCProgress } from '../../services/webrtc.service';
   styleUrl: './progress.component.css',
 })
 export class ProgressComponent implements OnChanges {
+  public cancel = output<void>();
   @Input() progress!: IWebRTCProgress;
   private _transferKey = '';
   private _startAtMs = 0;
@@ -25,6 +26,7 @@ export class ProgressComponent implements OnChanges {
     const now = performance.now();
 
     if (transferKey !== this._transferKey) {
+      this.forceHide = false;
       this._transferKey = transferKey;
       this._startAtMs = now;
       this.speedBytesPerSec = 0;

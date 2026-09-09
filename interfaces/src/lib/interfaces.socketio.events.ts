@@ -1,4 +1,5 @@
 export enum EnumSocketIOAppEvents {
+  TransferRejected = 'file:rejected',
   SocketReady = 'socket:ready',
   RoomUpdated = 'room:updated',
   PublishFile = 'file:publish',

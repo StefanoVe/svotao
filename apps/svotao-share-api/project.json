@@ -62,8 +62,13 @@
       "options": {
         "command": "cp ./apps/svotao-share-api/Dockerfile ./dist/apps/svotao-share-api && cp ./apps/svotao-share-api/captain-definition ./dist/apps/svotao-share-api && tar --strip-components=4 -cvf ./deploy.tar --exclude='*.map' ./dist/apps/svotao-share-api/* && caprover deploy -t ./deploy.tar -n notify -a p2p-api && rm ./deploy.tar"
       }
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "options": {
+        "jestConfig": "apps/svotao-share-api/jest.config.ts"
+      }
     }
   },
-
   "tags": []
 }

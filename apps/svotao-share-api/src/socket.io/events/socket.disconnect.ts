@@ -13,7 +13,7 @@ export const socketDisconnectEvent = (
 
     const fmRoom = floorManager.removeSocketFromRoom(socket);
 
-    floorManager.editRoomSocketData(socket, {});
+    if (!fmRoom) return;
 
     io.in(fmRoom.room).emit(
       EnumSocketIOAppEvents.RoomUpdated,

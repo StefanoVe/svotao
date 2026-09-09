@@ -1,3 +1,4 @@
+import { canSignal } from './signaling';
 import { EnumSocketIOAppEvents } from '@svotao/interfaces';
 import { Server, Socket } from 'socket.io';
 import { ContextualizedFloorManager } from '..';
@@ -9,11 +10,19 @@ export const socketRequestFileEvent = (
   return socket.on(
     EnumSocketIOAppEvents.RequestFile,
     (data: { peer: string }) => {
+      if (!canSignal(socket, floorManager, data?.peer)) return;
       const id = floorManager.getSocketHeaders(socket).agent.id;
       const room = floorManager.getSocketRoom(socket);
-      const peerData = room.socketsData[data.peer];
+      const peerData = room?.socketsData[data.peer];
 
-      if (!peerData.file?.name.length || !peerData.file?.size) {
+      if (
+        !peerData?.file?.name?.length ||
+        !Number.isSafeInteger(peerData.file.size) ||
+        peerData.file.size < 0
+      ) {
+        socket.emit(EnumSocketIOAppEvents.TransferRejected, {
+          from: data.peer,
+        });
         return;
       }
 

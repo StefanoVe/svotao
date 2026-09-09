@@ -1,6 +1,6 @@
 @if (!forceHide) {
   <div
-    class="text-sm font-bytesized text-white p-8 w-96 flex flex-col-reverse lg:flex-col"
+    class="progress-card text-sm font-bytesized text-white p-4 lg:p-8 w-full lg:w-96 flex flex-col-reverse lg:flex-col"
   >
     <div class="flex items-center gap-2">
       <div class="w-full bg-gray-800/29 rounded-full h-2.5">
@@ -35,6 +35,13 @@
       Destination: {{ progress.handshake.to }}
     </p>
 
+    <button
+      *ngIf="progress.percentage < 100"
+      (click)="cancel.emit()"
+      class="px-4 py-2 border border-white/50 cursor-pointer"
+    >
+      Cancel transfer
+    </button>
     <button
       *ngIf="progress.percentage === 100"
       (click)="forceHide = true"

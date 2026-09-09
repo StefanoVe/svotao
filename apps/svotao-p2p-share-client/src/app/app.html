@@ -1,23 +1,33 @@
+@if (webrtc.busy && !(webrtc.progress$ | async)) {
+<div class="connection-status font-bytesized text-white" role="status">
+  Connecting to peer…
+  <button type="button" (click)="webrtc.close()">Cancel</button>
+</div>
+}
 <!-- PROGRESS -->
 @if((webrtc.progress$ | async ); as progress) {
 <svotao-p2p-share-progress
   [progress]="progress"
-  class="fixed bottom-0 lg:top-0 left-0 z-50"
+  (cancel)="webrtc.close()"
+  class="transfer-panel"
 ></svotao-p2p-share-progress>
 }
 
-<div class="p-2 text-white min-h-[100dvh]">
+<div
+  class="share-page p-2 text-white min-h-[100dvh]"
+  [class.has-transfer]="webrtc.busy || !!(webrtc.progress$ | async)"
+>
   <!-- <h1 class="text-white font-extrabold text-3xl">Svotao P2P file sharing</h1> -->
   @if (socketio.socketData$ | async; as socketData) {
-  <div class="flex flex-col p-8 gap-2 gap-y-4 items-center">
+  <div class="flex flex-col p-4 lg:p-8 gap-2 gap-y-4 items-center">
     <!-- ROOM AND SOCKET INFO -->
-    <div class="flex items-center gap-2 group/connection">
+    <div class="room-header flex items-center gap-2 group/connection">
       @if (roomUrl$ | async; as roomUrl) {
       <svotao-liquid-glass
         type="host"
         [selected]="false"
-        class="w-fit hover:w-[50vh] group/roomUrl absolute"
-        containerClass="h-15 w-15 smooth flex items-center justify-between !backdrop-brightness-100 group-hover/roomUrl:!w-[50vh] smooth shrink-0"
+        class="w-fit lg:hover:w-[50vh] group/roomUrl absolute"
+        containerClass="h-15 w-15 smooth flex items-center justify-between !backdrop-brightness-100 lg:group-hover/roomUrl:!w-[50vh] smooth shrink-0"
       >
         <svotao-liquid-glass
           type="host"
@@ -51,12 +61,13 @@
       </svotao-liquid-glass>
       }
       <div class="size-15 shrink-0"></div>
-      <div class="font-bytesized p-2 leading-3">
+      <div class="room-info font-bytesized p-2 leading-3">
         <span>ID: {{socketData.userId}}</span>
         <br />
         <div class="flex flex-row items-center justify-start space-x-2 h-fit">
           <span>Room: {{socketData.room}}</span>
           <button
+            aria-label="Change room"
             (click)="changeRoom()"
             class="cursor-pointer rounded-full shrink-0 p-0.5 border"
           >
@@ -84,7 +95,7 @@
 
     <!-- UPLOAD BOX -->
     <div
-      class="relative p-3 mt-10 group/upload flex flex-col justify-center items-center"
+      class="original-upload relative p-3 mt-10 group/upload flex flex-col justify-center items-center"
     >
       <div
         class="pointer-events-none size-48 shrink-0 animate-rotating-border absolute -top-1 -left-1 z-10 group-hover/upload:opacity-0 smooth delay-300 group-hover/upload:delay-0"
@@ -94,7 +105,7 @@
         type="host"
         class="absolute origin-right z-10"
         [selected]="!!file.file?.name?.length"
-        containerClass=" {{!!file.file?.name?.length ? 'size-40 group-hover/upload:size-[20rem] !pointer-events-auto' : 'h-[10rem]  w-[50vh]'}} smooth  flex justify-center items-center overflow-hidden m-1 z-10 "
+        containerClass=" {{!!file.file?.name?.length ? 'size-40 lg:group-hover/upload:size-[20rem] !pointer-events-auto' : 'h-[10rem] w-[calc(100vw-4rem)] lg:w-[50vh]'}} smooth  flex justify-center items-center overflow-hidden m-1 z-10 "
       >
         <input
           #nativeFileInput
@@ -157,8 +168,8 @@
         *ngIf="!!file.file?.name?.length"
         type="host"
         [selected]="true"
-        class="absolute top-0 right-0 text-white shrink-0 scale-75 opacity-70 group-hover/upload:opacity-100 lg:hidden"
-        containerClass="flex  items-center justify-center shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/upload:!w-24 smooth delay-300"
+        class="absolute top-0 right-0 text-white shrink-0 opacity-90 group-hover/upload:opacity-100 lg:hidden"
+        containerClass="flex  items-center justify-center shrink-0 p-2 cursor-pointer w-11 h-11 lg:group-hover/upload:!w-24 smooth delay-300"
         (click)="publishFile({
             file: null,
             blob: null
@@ -169,7 +180,7 @@
 
       <div
         class="opacity-0 pointer-events-none"
-        [ngClass]="!!file.file?.name?.length ? 'size-40 !pointer-events-auto' : 'h-40  w-[50vh]'"
+        [ngClass]="!!file.file?.name?.length ? 'size-40 !pointer-events-auto' : 'h-40 w-[calc(100vw-4rem)] lg:w-[50vh]'"
       ></div>
     </div>
   </div>
@@ -177,14 +188,14 @@
   <!-- CONNECTED PEERS -->
   @if(socketio.roomData$ | async; as roomData) {
   <div
-    class="flex flex-col p-8 gap-2 gap-y-4 items-center justify-center h-[70vh] overflow-y-hidden relative"
+    class="peers-section flex flex-col p-4 lg:p-8 gap-2 gap-y-4 items-center justify-center lg:h-[70vh] relative"
   >
     <svotao-p2p-share-user-avatar
       [user]="socketData.userId"
       [showName]="false"
-      class="z-10 size-32 lg:size-48 absolute animate__zoomIn animate__animated pointer-events-none"
+      class="self-avatar z-10 size-32 lg:size-48 absolute animate__zoomIn animate__animated pointer-events-none"
       [selected]="false"
-      [backgroundColor]="roomData.socketsData[socketData.userId].backgroundColor || ''"
+      [backgroundColor]="roomData.socketsData[socketData.userId]?.backgroundColor || ''"
     ></svotao-p2p-share-user-avatar>
 
     <div
@@ -195,8 +206,11 @@
 
       <div
         class="circle group/file opacity-0 !duration-500"
-        (click)="requestFile(peer.id, roomData.socketsData[peer.id].file.name || '')"
-        (keyup.enter)="requestFile(peer.id, roomData.socketsData[peer.id].file.name || '')"
+        (click)="requestFile(peer.id, roomData.socketsData[peer.id]?.file?.name || '')"
+        (keyup.enter)="requestFile(peer.id, roomData.socketsData[peer.id]?.file?.name || '')"
+        role="button"
+        [attr.aria-disabled]="webrtc.busy || !roomData.socketsData[peer.id]?.file?.name"
+        (keydown.space)="$event.preventDefault(); requestFile(peer.id, roomData.socketsData[peer.id]?.file?.name || '')"
         tabindex="0"
       >
         <div class="float-avatar">
@@ -204,15 +218,15 @@
           <svotao-p2p-share-user-avatar
             [user]="peer.id"
             [showName]="false"
-            [backgroundColor]="roomData.socketsData[peer.id].backgroundColor || ''"
+            [backgroundColor]="roomData.socketsData[peer.id]?.backgroundColor || ''"
           ></svotao-p2p-share-user-avatar>
           <!-- FILENAME -->
           <svotao-liquid-glass
-            *ngIf="roomData.socketsData[peer.id]?.file?.size"
+            *ngIf="roomData.socketsData[peer.id]?.file?.name"
             type="host"
             [selected]="false"
-            class="absolute top-0 left-[80%] text-white shrink-0"
-            containerClass="flex  items-center justify-start shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/file:!w-96"
+            class="peer-file-label absolute top-0 left-[80%] text-white shrink-0"
+            containerClass="flex  items-center justify-start shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/file:!w-96 max-lg:!w-full"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -232,21 +246,22 @@
             <span
               class="opacity-0 size-0 group-hover/file:static group-hover/file:opacity-100 group-hover/file:size-full smooth pointer-events-none truncate mx-2 shrink group-hover/file:delay-300"
             >
-              {{roomData.socketsData[peer.id].file.name|| 'File'}}
+              {{roomData.socketsData[peer.id]?.file?.name|| 'File'}}
             </span>
           </svotao-liquid-glass>
           <!-- FILE SIZE -->
           <svotao-liquid-glass
-            *ngIf="roomData.socketsData[peer.id]?.file?.size"
+            *ngIf="roomData.socketsData[peer.id]?.file?.name"
             type="card"
             [selected]="false"
-            class="absolute top-10 left-[80%] text-white shrink-0 scale-75 opacity-0 group-hover/file:opacity-100"
-            containerClass="flex  items-center justify-start shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/file:!w-24 smooth delay-300"
+            class="peer-size-label absolute top-10 left-[80%] text-white shrink-0 scale-75 opacity-0 group-hover/file:opacity-100"
+            containerClass="flex  items-center justify-start shrink-0 p-2 cursor-pointer w-10 h-10 group-hover/file:!w-24 max-lg:!w-24 smooth delay-300"
           >
             <span
               class="absolute w-4 group-hover/file:static group-hover/file:w-full smooth pointer-events-none truncate mx-2 shrink font-bytesized text-lg"
             >
-              {{roomData.socketsData[peer.id].file.size | filesize: 'mb'}}
+              {{(roomData.socketsData[peer.id]?.file?.size || 0) | filesize:
+              'mb'}}
             </span>
           </svotao-liquid-glass>
         </div>

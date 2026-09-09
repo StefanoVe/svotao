@@ -1,3 +1,4 @@
+import { canSignal, validDescription } from './signaling';
 import { EnumSocketIOAppEvents } from '@svotao/interfaces';
 import { Server, Socket } from 'socket.io';
 import { ContextualizedFloorManager } from '..';
@@ -9,10 +10,14 @@ export const socketAcceptFileOfferEvent = (
   return socket.on(
     EnumSocketIOAppEvents.AcceptFileOffer,
     (data: { answer: RTCSessionDescriptionInit; to: string }) => {
-      console.log('Accepting file offer:', data);
+      if (
+        !canSignal(socket, floorManager, data?.to) ||
+        !validDescription(data?.answer, 'answer')
+      )
+        return;
       io.to(data.to).emit(EnumSocketIOAppEvents.RTCAnswer, {
         answer: data.answer,
-        from: socket.id,
+        from: floorManager.getSocketHeaders(socket).agent.id,
       });
     },
   );

@@ -13,6 +13,11 @@ export default {
     ],
   },
   transformIgnorePatterns: ['node_modules/(?!.*\\.mjs$)'],
+  moduleNameMapper: {
+    '^vecholib/angular/(components|services|modules)$':
+      '<rootDir>/../../node_modules/vecholib/angular/$1/fesm2022/$1.mjs',
+    '^@svotao/interfaces$': '<rootDir>/../../interfaces/src/index.ts',
+  },
   snapshotSerializers: [
     'jest-preset-angular/build/serializers/no-ng-attributes',
     'jest-preset-angular/build/serializers/ng-snapshot',

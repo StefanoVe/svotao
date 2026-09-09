@@ -15,6 +15,24 @@ export const socketIoAppEvents = (
   floorManager: bootstraps.SocketioFloorManager,
 ) => {
   normalizeSocketHandshakeHeaders(socket);
+  try {
+    const user = JSON.parse(String(socket.handshake.headers.user));
+    const agent = JSON.parse(String(socket.handshake.headers.agent));
+    if (
+      !user ||
+      (user.room != null &&
+        (typeof user.room !== 'string' || user.room.length > 128)) ||
+      !agent ||
+      typeof agent.id !== 'string' ||
+      !agent.id.length ||
+      agent.id.length > 256 ||
+      ['__proto__', 'prototype', 'constructor'].includes(agent.id)
+    )
+      throw new Error('Invalid handshake');
+  } catch {
+    socket.disconnect(true);
+    return;
+  }
   lm.log(`Socket connected with id ${socket.id}`, 'success');
 
   SOCKETIO_EVENTS.forEach((callback) => callback(io, socket, floorManager));

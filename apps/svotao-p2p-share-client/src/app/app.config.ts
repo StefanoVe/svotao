@@ -10,10 +10,7 @@ import {
 } from '@angular/platform-browser';
 import { provideAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import {
-  provideTailwindForms,
-  provideTailwindToasts,
-} from 'vecholib/angular/modules';
+import { provideTailwindToasts } from 'vecholib/angular/modules';
 import { provideSocketConnectionHandlerService } from 'vecholib/angular/services';
 import { environment } from '../environments/environment';
 import { appRoutes } from './app.routes';
@@ -23,7 +20,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(appRoutes),
-    provideTailwindForms({}),
     provideAnimations(),
     provideHttpClient(withFetch()),
     provideTailwindToasts(),
